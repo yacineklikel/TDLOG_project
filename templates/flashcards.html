@@ -1,6 +1,60 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <h1 class="text-center mb-4">Flashcards ⚡</h1>
-    <div class="alert alert-info">Module en construction...</div>
+
+<style>
+    /* LE CSS POUR LA 3D (Identique à avant, mais adapté) */
+    .scene {
+        width: 300px;
+        height: 200px;
+        margin: 40px auto;
+        perspective: 600px;
+    }
+    .card-object {
+        width: 100%;
+        height: 100%;
+        position: relative;
+        transition: transform 0.6s;
+        transform-style: preserve-3d;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        border-radius: 15px;
+    }
+    /* C'est cette classe que Alpine va ajouter/enlever */
+    .card-object.is-flipped {
+        transform: rotateY(180deg);
+    }
+    .card-face {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        backface-visibility: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 20px;
+        border-radius: 15px;
+        font-size: 1.2rem;
+    }
+    .card-front { background: white; color: #333; border: 2px solid #0d6efd; }
+    .card-back { background: #0d6efd; color: white; transform: rotateY(180deg); }
+</style>
+
+<div class="container text-center">
+    <h1 class="mb-4 mt-2">Flashcards ⚡</h1>
+
+    <div id="zone-carte">
+        {% include 'card_fragment.html' %}
+    </div>
+
+    <div class="mt-5">
+        <button hx-get="{{ url_for('next_card') }}" 
+                hx-target="#zone-carte" 
+                hx-swap="innerHTML"
+                class="btn btn-dark btn-lg rounded-pill px-5">
+            Carte Suivante ➡️
+        </button>
+    </div>
+</div>
+
 {% endblock %}

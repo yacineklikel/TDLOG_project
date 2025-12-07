@@ -1,5 +1,7 @@
 import os
 from flask import Flask, render_template, request, redirect, url_for
+import json
+import random
 
 app = Flask(__name__)
 
@@ -36,6 +38,29 @@ def gestion_dossier(categorie):
     
     return liste_org, liste_upl
 
+def piocher_carte_aleatoire():
+    chemin_json = os.path.join(BASE_DIR, 'flashcards.json')
+    if os.path.exists(chemin_json):
+        with open(chemin_json, 'r', encoding='utf-8') as f:
+            cartes = json.load(f)
+            if cartes:
+                return random.choice(cartes)
+    return None
+
+# --- ROUTE 1 : La page complète (chargement initial) ---
+@app.route('/flashcards')
+def flashcards():
+    carte = piocher_carte_aleatoire()
+    # On rend la page entière (qui inclut le fragment)
+    return render_template('flashcards.html', page='flashcards', carte=carte)
+
+# --- ROUTE 2 : Juste la prochaine carte (appelée par HTMX) ---
+@app.route('/flashcards/next')
+def next_card():
+    carte = piocher_carte_aleatoire()
+    # ATTENTION : Ici on ne renvoie QUE le fragment, pas toute la page !
+    return render_template('card_fragment.html', carte=carte)
+
 # --- ROUTES ---
 
 @app.route('/')
@@ -61,9 +86,6 @@ def fiches():
     org, upl = resultat
     return render_template('fiches.html', originaux=org, uploads=upl, page='fiches')
 
-@app.route('/flashcards')
-def flashcards():
-    return render_template('flashcards.html', page='flashcards')
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

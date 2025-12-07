@@ -1,0 +1,24 @@
+<div class="scene" x-data="{ retournee: false }" style="cursor: pointer;">
+    
+    <div class="card-object" 
+         @click="retournee = !retournee" 
+         :class="{ 'is-flipped': retournee }">
+        
+        <div class="card-face card-front">
+            <div>
+                <small class="text-muted text-uppercase fw-bold">Question</small>
+                <hr class="my-2 w-50 mx-auto">
+                {{ carte.question }}
+            </div>
+        </div>
+
+        <div class="card-face card-back">
+            <div>
+                <small class="text-uppercase fw-bold" style="opacity: 0.8">Réponse</small>
+                <hr class="my-2 w-50 mx-auto border-white">
+                {{ carte.reponse }}
+            </div>
+        </div>
+
+    </div>
+</div>

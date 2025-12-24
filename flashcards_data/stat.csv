@@ -1,0 +1,73 @@
+"En théorie des probabilités, qu'est-ce qu'une variable aléatoire à valeurs dans un espace mesurable $(E, \mathcal{E})$ ?","C'est une fonction mesurable $X : (\Omega, \mathcal{A}) \to (E, \mathcal{E})$."
+Comment est définie la loi (ou distribution) d'une variable aléatoire $X$ ?,"C'est la mesure de probabilité $\mathbb{P}_X$ sur $(E, \mathcal{E})$ définie par $\mathbb{P}_X(C) = \mathbb{P}(\{ \omega \in \Omega : X(\omega) \in C \})$ pour tout $C \in \mathcal{E}$."
+Quelle est la caractéristique principale d'une variable aléatoire discrète ?,Elle prend ses valeurs dans un ensemble fini ou dénombrable.
+"La loi de Bernoulli, notée $\mathcal{B}(p)$, modélise une expérience binaire. Quelle est sa fonction de masse ?",$\mathbb{P}(X=1) = p$ et $\mathbb{P}(X=0) = 1-p$.
+"Si $X \sim \mathcal{B}(p)$, quelles sont son espérance $E[X]$ et sa variance $Var(X)$ ?",$E[X] = p$ et $Var(X) = p(1-p)$.
+La _____ est la loi de la somme de $n$ variables de Bernoulli indépendantes et de même paramètre $p$.,"loi binomiale $\mathcal{B}(n, p)$"
+"Quelle est la fonction de masse de la loi binomiale $\mathcal{B}(n, p)$ ?","$\mathbb{P}(S_n = k) = \binom{n}{k} p^k (1-p)^{n-k}$ pour $k \in \{0, \dots, n\}$."
+Quelle loi de probabilité modélise le temps du premier succès dans une série d'épreuves de Bernoulli indépendantes ?,La loi géométrique $\mathcal{G}(p)$.
+"La loi de Poisson $\mathcal{P}(\lambda)$ est une approximation de la loi binomiale lorsque $n$ est grand, $p$ est petit, et $np \to \lambda$. Quelle est sa fonction de masse ?",$\mathbb{P}(N=k) = e^{-\lambda} \frac{\lambda^k}{k!}$ pour $k \ge 0$.
+La densité de la loi Exponentielle $\mathcal{E}(\lambda)$ est donnée par _____.,$p(x) = \lambda e^{-\lambda x}$ pour $x \ge 0$
+Quelle est la relation entre la fonction de répartition (CDF) $F$ et la densité $p$ d'une variable aléatoire réelle ?,"$F(x) = \int_{-\infty}^x p(t) dt$, et donc $p(x) = F'(x)$."
+"Comment définit-on un quantile d'ordre $r \in (0, 1)$ pour une variable aléatoire réelle $X$ ?",C'est un nombre $q_r$ tel que $\mathbb{P}(X \le q_r) \ge r$ et $\mathbb{P}(X \ge q_r) \ge 1-r$.
+"Un vecteur aléatoire $X \in \mathbb{R}^d$ est dit Gaussien si, pour tout $u \in \mathbb{R}^d$, la variable aléatoire _____ est Gaussienne.","$\langle u, X \rangle$"
+Qu'est-ce que la Loi des Grands Nombres (forte) garantit pour la moyenne empirique $\bar{X}_n$ d'une suite de variables i.i.d. ?,Elle garantit que $\bar{X}_n$ converge presque sûrement vers l'espérance $E[X_1]$.
+Quel théorème fondamental décrit la convergence en loi de la moyenne empirique normalisée d'une suite de variables i.i.d. ?,Le Théorème de la Limite Centrale (Central Limit Theorem).
+"Selon le Théorème de la Limite Centrale, vers quelle loi converge $\sqrt{n}(\bar{X}_n - \mu) / \sigma$ ?","Vers la loi normale centrée réduite $\mathcal{N}(0, 1)$."
+"En statistiques, qu'est-ce qu'une 'statistique' ?","C'est une variable aléatoire qui s'écrit comme une fonction déterministe de l'échantillon, ne dépendant pas du paramètre inconnu."
+Un estimateur $Z_n$ d'une quantité d'intérêt (QoI) est dit 'convergent' (consistent) si _____.,$Z_n$ converge en probabilité vers la QoI lorsque $n \to +\infty$
+Comment est définie l'erreur quadratique moyenne (Mean Squared Error - MSE) d'un estimateur $Z_n$ ?,$MSE(Z_n) = E[\|Z_n - QoI\|^2]$.
+Quelle est la décomposition biais-variance de l'erreur quadratique moyenne (MSE) ?,"$MSE(Z_n) = \|b(Z_n)\|^2 + Var(Z_n)$, où $b(Z_n)$ est le biais."
+"L'estimateur non biaisé de la variance, noté $S_n^2$, est défini par la formule _____.",$S_n^2 := \frac{1}{n-1} \sum_{i=1}^n (X_i - \bar{X}_n)^2$
+"Dans la méthode des moments, comment obtient-on un estimateur d'un paramètre $\theta$ ?",En égalisant les moments théoriques (qui dépendent de $\theta$) aux moments empiriques correspondants et en résolvant pour $\theta$.
+Que stipule la méthode Delta (Delta Method) ?,Elle décrit la distribution asymptotique d'une fonction différentiable d'un estimateur asymptotiquement normal.
+"Si $\sqrt{n}(\zeta_n - a) \to Y$ en distribution, la méthode Delta dit que $\sqrt{n}(\phi(\zeta_n) - \phi(a))$ converge en distribution vers _____.",$\nabla\phi(a)Y$
+"Qu'énonce le théorème de Cochran pour un vecteur Gaussien standard $G \in \mathbb{R}^n$ et deux sous-espaces linéaires orthogonaux $E_1, E_2$ ?",Les vecteurs aléatoires $G_{E_1}$ et $G_{E_2}$ (projections de $G$) sont indépendants.
+"La loi du chi-deux à $n$ degrés de liberté, notée $\chi^2(n)$, est la loi de la somme des carrés de _____.",$n$ variables aléatoires normales centrées réduites indépendantes
+"Dans un modèle Gaussien, quelle est la loi de la moyenne empirique $\bar{X}_n$ ?","$\bar{X}_n \sim \mathcal{N}(\mu, \frac{\sigma^2}{n})$."
+"Dans un modèle Gaussien, $\bar{X}_n$ et $S_n^2$ sont-ils dépendants ou indépendants ?",Ils sont indépendants.
+"Dans un modèle Gaussien, quelle est la loi de la variable $(n-1)S_n^2 / \sigma^2$ ?","Elle suit une loi du chi-deux à $n-1$ degrés de liberté, $\chi^2(n-1)$."
+"La distribution de Student à $n$ degrés de liberté, notée $t(n)$, est définie comme le ratio de $G$ et $\sqrt{H/n}$, où $G \sim \mathcal{N}(0,1)$ et $H \sim$ _____.","$\chi^2(n)$, avec $G$ et $H$ indépendantes"
+Quel est le but principal de la construction d'un intervalle de confiance ?,Fournir une plage de valeurs qui a une probabilité spécifiée (le niveau de confiance) de contenir le vrai paramètre.
+"La méthode de la fonction pivotale pour construire des intervalles de confiance exacts repose sur une fonction $Q(X_n, \theta)$ dont la loi _____.",ne dépend pas du paramètre $\theta$
+"Pour construire un intervalle de confiance pour la moyenne $\mu$ d'un échantillon Gaussien à variance inconnue, on utilise la statistique $\frac{\sqrt{n}(\bar{X}_n - \mu)}{S_n}$ qui suit une loi _____.",de Student à $n-1$ degrés de liberté
+"Comment est définie la fonction de vraisemblance (likelihood) $L_n(x_n; \theta)$ pour une réalisation $x_n = (x_1, ..., x_n)$ ?","$L_n(x_n; \theta) = \prod_{i=1}^n p(x_i; \theta)$, où $p(x; \theta)$ est la densité ou la fonction de masse."
+Qu'est-ce que l'estimateur du maximum de vraisemblance (EMV ou MLE) ?,C'est la valeur du paramètre $\theta$ qui maximise la fonction de vraisemblance pour l'échantillon observé.
+"Pour des raisons de commodité de calcul, on maximise souvent la _____ au lieu de la vraisemblance.",log-vraisemblance (log-likelihood)
+"Dans un modèle régulier, la fonction 'score' est le _____ de la log-vraisemblance par rapport au paramètre.",gradient
+Qu'est-ce que l'information de Fisher $I(\theta)$ ?,"C'est la variance de la fonction score, ou l'opposé de l'espérance de la dérivée seconde de la log-vraisemblance."
+Que stipule la borne de Cramér-Rao pour un estimateur non biaisé $\tilde{\theta}_n$ ?,Elle établit une borne inférieure pour la variance de l'estimateur : $Cov_{\theta}[\tilde{\theta}_n] \succeq \frac{1}{n} I(\theta)^{-1}$.
+Un estimateur non biaisé qui atteint la borne de Cramér-Rao est dit _____.,efficace
+Quelle est la principale différence entre l'inférence fréquentiste et l'inférence bayésienne ?,L'approche bayésienne incorpore une connaissance a priori sur le paramètre via une distribution a priori (prior).
+"En inférence bayésienne, la distribution _____ combine l'information de la distribution a priori et des données (via la vraisemblance).",a posteriori (posterior)
+Comment est calculée la distribution a posteriori $Q(d\theta|x_n)$ à partir de la distribution a priori $Q(d\theta)$ et de la vraisemblance $L_n(x_n; \theta)$ ?,$Q(d\theta|x_n) \propto L_n(x_n; \theta) Q(d\theta)$.
+Une famille de distributions a priori est dite 'conjuguée' pour un modèle de vraisemblance si _____.,la distribution a posteriori appartient à la même famille de distributions que la distribution a priori
+"Dans l'exemple Bêta-Bernoulli, si l'a priori est une loi Bêta, la loi a posteriori est également une _____.",loi Bêta
+L'estimateur bayésien appelé 'moyenne a posteriori' (Posterior Mean - PM) est _____ de la distribution a posteriori.,l'espérance
+L'estimateur bayésien appelé 'maximum a posteriori' (MAP) est _____ de la distribution a posteriori.,le mode
+"En statistiques, qu'est-ce qu'une hypothèse nulle ($H_0$) ?","C'est une hypothèse de référence, souvent l'absence d'un effet, que l'on cherche à rejeter."
+Une erreur de type I dans un test d'hypothèse consiste à _____.,rejeter l'hypothèse nulle $H_0$ alors qu'elle est vraie
+Une erreur de type II dans un test d'hypothèse consiste à _____.,ne pas rejeter l'hypothèse nulle $H_0$ alors qu'elle est fausse
+"Le 'niveau' (level) d'un test, noté $\alpha$, est la probabilité maximale de commettre une _____.",erreur de type I
+La 'puissance' (power) d'un test est la probabilité de _____.,rejeter correctement une hypothèse nulle fausse (1 - P(erreur de type II))
+Comment interprète-t-on la p-valeur (p-value) d'un test ?,C'est le plus petit niveau de significativité $\alpha$ pour lequel on rejetterait l'hypothèse nulle avec les données observées.
+Quelle est la relation (dualité) entre un intervalle de confiance à $1-\alpha$ pour $\theta$ et un test d'hypothèse pour $H_0: \theta = \theta_0$ ?,On rejette $H_0$ au niveau $\alpha$ si et seulement si $\theta_0$ n'est pas dans l'intervalle de confiance à $1-\alpha$.
+Quel test utilise-t-on pour comparer la moyenne d'un échantillon Gaussien à une valeur connue $\mu_0$ lorsque la variance est inconnue ?,Le test t de Student à un échantillon (one-sample t-test).
+Le test t de Student à deux échantillons (two-sample t-test) est utilisé pour tester l'hypothèse _____.,"$H_0: \mu_1 = \mu_2$, l'égalité des moyennes de deux populations Gaussiennes indépendantes"
+Le test F de Fisher est utilisé pour comparer les _____ de deux populations Gaussiennes indépendantes.,variances
+"En régression linéaire multiple, l'estimateur des moindres carrés ordinaires (MCO ou OLS) minimise _____.",la somme des carrés des résidus (la différence entre les valeurs observées et les valeurs prédites)
+Que mesure le coefficient de détermination $R^2$ en régression linéaire ?,La proportion de la variance de la variable dépendante qui est prévisible à partir des variables indépendantes.
+"Le théorème de Gauss-Markov stipule que, sous certaines hypothèses, l'estimateur MCO (OLS) est le _____.",meilleur estimateur linéaire non biaisé (Best Linear Unbiased Estimator - BLUE)
+"Le test de Wald est un test d'hypothèse asymptotique basé sur la distance entre l'estimateur et la valeur sous $H_0$, normalisée par _____.",l'erreur standard de l'estimateur
+Le test du rapport de vraisemblance (Likelihood Ratio Test) compare la vraisemblance maximisée sous l'hypothèse nulle à la vraisemblance maximisée _____.,sur tout l'espace des paramètres (sous l'hypothèse alternative)
+"La statistique de test du rapport de vraisemblance, sous $H_0$, suit asymptotiquement une loi _____.",du chi-deux ($\chi^2$)
+À quoi sert un test d'ajustement du chi-deux (chi-squared goodness-of-fit test) ?,À tester si les fréquences observées d'une variable catégorielle correspondent à des fréquences attendues (théoriques).
+Le test du chi-deux d'indépendance est utilisé pour déterminer s'il existe une association significative entre _____.,deux variables catégorielles
+Le test du chi-deux d'homogénéité vise à déterminer si _____.,différents échantillons proviennent de la même distribution de population pour une variable catégorielle
+Comment est définie la fonction de répartition empirique (empirical CDF) $\hat{F}_n(x)$ ?,$\hat{F}_n(x) = \frac{1}{n} \sum_{i=1}^n \mathbf{1}_{\{X_i \le x\}}$.
+Le théorème de Glivenko-Cantelli garantit que la fonction de répartition empirique converge _____ vers la vraie fonction de répartition.,uniformément et presque sûrement
+Le test de Kolmogorov-Smirnov est un test d'ajustement non paramétrique qui mesure la distance maximale entre _____.,la fonction de répartition empirique et la fonction de répartition théorique (sous $H_0$)
+"Un avantage majeur du test de Kolmogorov-Smirnov est que la loi de sa statistique de test sous $H_0$ est 'libre' (free), ce qui signifie _____.",qu'elle ne dépend pas de la distribution spécifique testée (tant qu'elle est continue)
+La correction de Lilliefors est une modification du test de Kolmogorov-Smirnov utilisée lorsque _____.,"les paramètres de la distribution testée (par exemple, la moyenne et la variance pour une loi normale) sont estimés à partir des données"
+Le test de Shapiro-Wilk est un test spécifiquement conçu pour vérifier l'hypothèse de _____ d'un échantillon.,normalité
+L'intuition derrière le test de Shapiro-Wilk est de mesurer la _____ des points sur un QQ-plot normal.,linéarité

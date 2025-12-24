@@ -1,0 +1,78 @@
+Quelle est la définition d'une $\sigma$-algèbre (ou tribu) $\mathcal{F}$ sur un ensemble $\Omega$ ?,"C'est une collection de sous-ensembles de $\Omega$ qui contient $\Omega$, est stable par passage au complémentaire et par union dénombrable."
+"Si $\mathcal{C} = \{A\}$ où $A \subset \Omega$, quelle est la $\sigma$-algèbre engendrée par $\mathcal{C}$ ?","La $\sigma$-algèbre engendrée, $\sigma(\mathcal{C})$, est $\{\emptyset, A, A^c, \Omega\}$."
+Qu'est-ce qu'un espace mesurable ?,"Un couple $(\Omega, \mathcal{F})$ où $\Omega$ est un ensemble et $\mathcal{F}$ est une $\sigma$-algèbre sur $\Omega$."
+"Quelle est la définition d'une mesure $\mu$ sur un espace mesurable $(\Omega, \mathcal{F})$ ?","C'est une fonction $\sigma$-additive à valeurs dans $[0, +\infty]$ définie sur $\mathcal{F}$ telle que $\mu(\emptyset) = 0$."
+"Quand dit-on qu'une mesure $\mu$ sur $(\Omega, \mathcal{F})$ est une mesure de probabilité ?",Lorsque $\mu(\Omega) = 1$.
+"Selon le Corollaire 1.10, si $(\Omega, \mathcal{F}, P)$ est un espace de probabilité et $A \in \mathcal{F}$, comment s'exprime $P(A^c)$ ?",$P(A^c) = 1 - P(A)$.
+Qu'est-ce qu'un système $\pi$ (ou collection stable par intersection finie) ?,C'est une collection de sous-ensembles de $\Omega$ qui est stable par intersection finie.
+Énoncez le Théorème de la classe monotone (Théorème 1.13).,"Si $\mathcal{C}$ est un système $\pi$, alors tout système $\lambda$ contenant $\mathcal{C}$ contient également la $\sigma$-algèbre engendrée $\sigma(\mathcal{C})$."
+"Quand une fonction $f$ d'un espace mesurable $(S, \mathcal{S})$ dans $(E, \mathcal{E})$ est-elle dite mesurable ?","Lorsque la $\sigma$-algèbre engendrée par $f$, notée $\sigma(f)$, est incluse dans $\mathcal{S}$ (c'est-à-dire, $f^{-1}(A) \in \mathcal{S}$ pour tout $A \in \mathcal{E}$)."
+"Soit $A \subset S$. La fonction indicatrice $1_A$ est mesurable de $(S, \mathcal{S})$ dans $(\mathbb{R}, \mathcal{B}(\mathbb{R}))$ si et seulement si _____.","$A$ est mesurable (i.e., $A \in \mathcal{S}$)."
+"Si $(f_n, n \in \mathbb{N})$ est une suite de fonctions mesurables à valeurs réelles, les fonctions $\limsup_{n\to\infty} f_n$ et $\liminf_{n\to\infty} f_n$ sont-elles mesurables ?","Oui, elles sont toutes les deux mesurables."
+Qu'est-ce qu'une variable aléatoire (v.a.) ?,"C'est une fonction mesurable $X$ définie sur un espace de probabilité $(\Omega, \mathcal{F}, P)$ à valeurs dans un espace mesurable $(E, \mathcal{E})$."
+Comment définit-on l'espérance $E[X]$ d'une variable aléatoire réelle $X$ ?,"L'espérance est l'intégrale de $X$ par rapport à la mesure de probabilité $P$, notée $E[X] = \int X(\omega) P(d\omega)$."
+Quelle est l'inégalité de Cauchy-Schwarz pour deux variables aléatoires $f$ et $g$ de carré intégrable ?,$\int |fg| d\mu \leq (\int f^2 d\mu)^{1/2} (\int g^2 d\mu)^{1/2}$.
+Énoncez l'inégalité de Jensen pour une v.a. $X$ intégrable à valeurs dans $\mathbb{R}^d$ et une fonction convexe $\varphi$.,$\varphi(E[X]) \leq E[\varphi(X)]$.
+Comment définit-on la covariance de deux variables aléatoires $X$ et $Y$ de carré intégrable ?,"$\text{Cov}(X,Y) = E[XY] - E[X]E[Y]$."
+Comment définit-on la variance d'une variable aléatoire $X$ de carré intégrable ?,"$\text{Var}(X) = \text{Cov}(X,X) = E[(X - E[X])^2]$."
+"Si des variables aléatoires $(X_i, i \in I)$ sont indépendantes, que peut-on dire de $E[\prod_{j \in J} f_j(X_j)]$ pour tout sous-ensemble fini $J \subset I$ ?",$E[\prod_{j \in J} f_j(X_j)] = \prod_{j \in J} E[f_j(X_j)]$ pour toutes fonctions mesurables bornées $f_j$.
+"Quelle est la définition de l'espérance conditionnelle $E[X|\mathcal{H}]$ d'une v.a. $X$ dont l'espérance est bien définie, par rapport à une sous-tribu $\mathcal{H}$ ?",C'est l'unique (à une égalité p.s. près) variable aléatoire $Z$ qui est $\mathcal{H}$-mesurable et qui vérifie $E[X 1_A] = E[Z 1_A]$ pour tout $A \in \mathcal{H}$.
+"Si $X \in L^2$, comment peut-on interpréter géométriquement $E[X|\mathcal{H}]$ ?",C'est la projection orthogonale de $X$ sur le sous-espace de Hilbert des variables aléatoires de carré intégrable et $\mathcal{H}$-mesurables.
+"Propriété de l'espérance conditionnelle : si $X \geq 0$ presque sûrement, alors $E[X|\mathcal{H}] \geq 0$ _____.",presque sûrement
+"Propriété de l'espérance conditionnelle : si $X$ est $\mathcal{H}$-mesurable, alors $E[X|\mathcal{H}] = \_\_\_\_\_$.",$X$ (presque sûrement)
+"Propriété de l'espérance conditionnelle : si $X$ est indépendante de $\mathcal{H}$, alors $E[X|\mathcal{H}] = \_\_\_\_\_$.",$E[X]$ (presque sûrement)
+"Propriété de l'espérance conditionnelle (tour) : si $\mathcal{G} \subset \mathcal{H}$ est une sous-tribu, alors $E[E[X|\mathcal{H}]|\mathcal{G}] = \_\_\_\_\_$.",$E[X|\mathcal{G}]$ (presque sûrement)
+"Si $V$ est une variable aléatoire discrète, quelle est la formule explicite pour $E[X|V=v]$ lorsque $P(V=v) > 0$ ?",$E[X|V=v] = \frac{E[X 1_{\{V=v\}}]}{P(V=v)}$.
+"Qu'est-ce qu'une filtration $\mathbb{F} = (\mathcal{F}_n, n \in \mathbb{N})$ ?","C'est une suite croissante de sous-tribus de $\mathcal{F}$, c'est-à-dire $\mathcal{F}_n \subset \mathcal{F}_{n+1}$ pour tout $n \in \mathbb{N}$."
+"Quand dit-on qu'un processus stochastique $(X_n, n \in \mathbb{N})$ est adapté à une filtration $(\mathcal{F}_n, n \in \mathbb{N})$ ?","Lorsque pour chaque $n \in \mathbb{N}$, la variable aléatoire $X_n$ est $\mathcal{F}_n$-mesurable."
+"Quelle est la propriété de Markov pour un processus $(X_n, n \in \mathbb{N})$ par rapport à sa filtration naturelle $\mathcal{F}_n = \sigma(X_0, ..., X_n)$ ?","Conditionnellement à $X_n$, le futur $(X_{n+k}, k \geq 1)$ est indépendant du passé $(X_0, ..., X_{n-1})$."
+Qu'est-ce qu'une matrice de transition (ou matrice stochastique) $P$ pour une chaîne de Markov sur un espace d'états $E$ ?,"Une matrice $P=(P(x,y))_{x,y \in E}$ telle que $P(x,y) \geq 0$ et $\sum_{y \in E} P(x,y) = 1$ pour tout $x \in E$."
+Quand dit-on qu'une chaîne de Markov est homogène ?,Lorsque sa matrice de transition ne dépend pas du temps.
+La distribution d'une chaîne de Markov homogène est caractérisée par sa matrice de transition $P$ et sa _____.,distribution de probabilité initiale $\mu_0$
+"Comment exprime-t-on la probabilité d'une trajectoire $(x_0, ..., x_n)$ pour une chaîne de Markov homogène ?","$P(X_0=x_0, ..., X_n=x_n) = \mu_0(x_0) \prod_{k=1}^n P(x_{k-1}, x_k)$."
+Qu'est-ce qu'une mesure de probabilité invariante $\pi$ pour une chaîne de Markov de matrice de transition $P$ ?,C'est une mesure de probabilité telle que $\pi P = \pi$.
+Quand dit-on qu'un état $y$ est accessible depuis un état $x$ (noté $x \to y$) ?,"S'il existe un entier $n \in \mathbb{N}$ tel que $P^n(x,y) > 0$."
+Quand dit-on que deux états $x$ et $y$ communiquent (noté $x \leftrightarrow y$) ?,Lorsque $x$ est accessible depuis $y$ et $y$ est accessible depuis $x$.
+Quand une chaîne de Markov est-elle dite irréductible ?,"Lorsque tous les états communiquent entre eux, formant une seule classe de communication."
+Comment définit-on le temps de premier retour $T_x$ en un état $x$ ?,$T_x = \inf\{n \geq 1; X_n = x\}$.
+Un état $x$ est dit récurrent si la probabilité de retourner en $x$ en partant de $x$ est égale à _____.,1 (c'est-à-dire $P_x(T_x < \infty) = 1$).
+Un état $x$ est dit transitoire si la probabilité de retourner en $x$ en partant de $x$ est _____.,strictement inférieure à 1 (c'est-à-dire $P_x(T_x < \infty) < 1$).
+Un état récurrent $x$ est dit récurrent positif si le temps moyen de retour $E_x[T_x]$ est _____.,fini
+Un état récurrent $x$ est dit récurrent nul si le temps moyen de retour $E_x[T_x]$ est _____.,infini
+Quelle est la période d'un état $x$ ?,"C'est le plus grand commun diviseur de l'ensemble des entiers $n \geq 1$ pour lesquels $P^n(x,x) > 0$."
+Quand une chaîne de Markov irréductible est-elle dite apériodique ?,Lorsque la période de l'un de ses états (et donc de tous) est égale à 1.
+Toute chaîne de Markov irréductible sur un espace d'états fini est _____.,récurrente positive
+"Si une chaîne de Markov irréductible est récurrente positive, elle admet une unique _____.",mesure de probabilité invariante
+"Si une chaîne de Markov est irréductible, récurrente positive et apériodique, que peut-on dire de la convergence de la distribution de $X_n$ ?",La distribution de $X_n$ converge vers l'unique mesure de probabilité invariante $\pi$ lorsque $n \to \infty$.
+Quelle est la condition pour qu'une marche aléatoire simple sur $\mathbb{Z}^d$ soit récurrente ?,Elle est récurrente si et seulement si la dimension $d$ est 1 ou 2.
+"Un processus stochastique $(M_n, n \in \mathbb{N})$ est une martingale par rapport à la filtration $(\mathcal{F}_n)$ si pour tout $n$, $M_n$ est intégrable, adapté, et _____.",$E[M_{n+1} | \mathcal{F}_n] = M_n$ presque sûrement.
+Un processus $(M_n)$ est une sous-martingale si $E[M_{n+1} | \mathcal{F}_n] \geq M_n$ p.s. et une super-martingale si _____.,$E[M_{n+1} | \mathcal{F}_n] \leq M_n$ p.s.
+"Soit $(X_n, n \in \mathbb{N})$ une suite de v.a. indépendantes et de carré intégrable telles que $E[X_n]=0$. Le processus $M_n = (\sum_{k=0}^n X_k)^2 - \sum_{k=0}^n E[X_k^2]$ est-il une martingale ?","Oui, c'est une martingale."
+Qu'est-ce qu'un temps d'arrêt $\tau$ par rapport à une filtration $(\mathcal{F}_n)$ ?,"C'est une variable aléatoire à valeurs dans $\mathbb{N} \cup \{+\infty\}$ telle que pour tout $n \in \mathbb{N}$, l'événement $\{\tau \leq n\}$ appartient à $\mathcal{F}_n$."
+"Selon le théorème d'arrêt optionnel, si $M$ est une martingale et $\tau$ est un temps d'arrêt borné, alors $E[M_\tau] = \_\_\_\_\_$.",$E[M_0]$
+"Qu'est-ce qu'un processus Gaussien $X=(X_t, t \in T)$ ?","C'est un processus stochastique tel que pour tout sous-ensemble fini $J \subset T$, le vecteur $(X_t, t \in J)$ est un vecteur Gaussien."
+La loi d'un processus Gaussien est entièrement caractérisée par sa fonction de moyenne et sa _____.,fonction de covariance
+"Un mouvement Brownien standard $B=(B_t, t \geq 0)$ est un processus Gaussien centré avec une fonction de covariance $K(s,t) = \_\_\_\_\_$.","$\min(s,t)$"
+"Quelle est la loi de l'accroissement $B_t - B_s$ pour un mouvement Brownien standard, avec $t > s$ ?","Une loi Normale centrée de variance $t-s$, notée $\mathcal{N}(0, t-s)$."
+Le mouvement Brownien a des accroissements indépendants et _____.,stationnaires
+Quelle est la propriété de Markov forte du mouvement Brownien ?,"Si $T$ est un temps d'arrêt fini, le processus $(\tilde{B}_t = B_{T+t} - B_T, t \geq 0)$ est un mouvement Brownien standard indépendant de la tribu $\mathcal{F}_T$."
+L'intégrale de Wiener $\int_0^t h(s) dB_s$ est une variable aléatoire de loi _____.,"Normale centrée, de variance $\int_0^t h(s)^2 ds$."
+"Le processus $(M_t = \int_0^t h(s) dB_s, t \geq 0)$ pour une fonction $h$ localement de carré intégrable est une _____.",martingale
+"Selon le théorème de Cameron-Martin, quelle est la relation entre $E[F((B_u + \int_0^u h(s) ds, u \in [0,t]))]$ et $E[M_t^h F((B_u, u \in [0,t]))]$ ?","Elles sont égales, où $M_t^h = \exp(\int_0^t h(s) dB_s - \frac{1}{2} \int_0^t h(s)^2 ds)$."
+"Pour $a>0$, le temps d'atteinte $\tau_a = \inf\{t \geq 0; B_t = a\}$ est-il fini presque sûrement ?","Oui, le temps d'atteinte d'un niveau par un mouvement Brownien standard est fini presque sûrement."
+Quelle est la transformée de Laplace du temps d'atteinte $\tau_a$ ? ($E[e^{-\lambda \tau_a}]$),$e^{-a\sqrt{2\lambda}}$ pour $\lambda \geq 0$.
+Qu'est-ce qu'une algèbre de Boole sur $\Omega$ ?,Une collection de sous-ensembles de $\Omega$ stable par union finie et par passage au complémentaire.
+Le théorème d'extension de Carathéodory garantit qu'une probabilité définie sur une algèbre de Boole peut être étendue de manière unique à _____.,la $\sigma$-algèbre engendrée par cette algèbre.
+Qu'est-ce que la convergence en distribution (ou en loi) d'une suite de variables aléatoires $(X_n)$ vers $X$ ?,C'est la convergence de $E[f(X_n)]$ vers $E[f(X)]$ pour toute fonction $f$ continue et bornée.
+"Pour des variables aléatoires sur un espace discret, la convergence en loi est équivalente à la convergence _____ des probabilités ponctuelles.",simple
+Qu'est-ce qu'une famille de variables aléatoires uniformément intégrable ?,C'est une famille $(X_i)$ pour laquelle $\sup_i E[|X_i| 1_{\{|X_i| \geq K\}}] \to 0$ quand $K \to \infty$.
+Une suite $(X_n)$ converge dans $L^1$ vers $X_\infty$ si et seulement si elle converge en probabilité vers $X_\infty$ et elle est _____.,uniformément intégrable
+Soit $X$ une v.a. intégrable. La famille des espérances conditionnelles $(E[X|\mathcal{H}]; \mathcal{H} \text{ est une sous-tribu})$ est-elle uniformément intégrable ?,"Oui, elle l'est."
+"Si $X$ et $Y$ sont indépendantes et intégrables, alors $E[X+Y|X] = \_\_\_\_\_$.",$X + E[Y]$
+Soient $X_1$ et $X_2$ i.i.d. Bernoulli de paramètre $p$. Calculez $E[X_1|X_1+X_2]$.,$E[X_1|X_1+X_2] = \frac{X_1+X_2}{2}$.
+La marche aléatoire du modèle 'Labyrinthe' (Ex. 3.2) où la souris choisit une case adjacente uniformément mais pas celle de l'étape précédente est-elle une chaîne de Markov ?,"Non, le processus des positions $(X_n)$ n'est pas une chaîne de Markov."
+"Dans le modèle du 'Labyrinthe' avec mémoire (Ex 3.2), quel processus est une chaîne de Markov ?","Le processus des paires de positions successives $Z_n = (X_{n-1}, X_n)$."
+"Dans le modèle auto-régressif $X_{n+1} = a X_n + \varepsilon_{n+1}$ où les $(\varepsilon_n)$ sont i.i.d. de moyenne $\mu$, quelle est l'espérance $E[X_{n+1}|X_n]$ ?",$E[X_{n+1}|X_n] = a X_n + \mu$.
+"Sous quelles conditions sur $(a, \mu)$ le processus auto-régressif $X_{n+1} = a X_n + \varepsilon_{n+1}$ (avec $\varepsilon_n$ i.i.d.) est-il une martingale ?",$a=1$ et $\mu=0$.
+Soit $P$ une matrice stochastique. Une mesure $\pi$ est réversible par rapport à $P$ si _____.,"$\pi(x) P(x,y) = \pi(y) P(y,x)$ pour tous les états $x,y$ (équation de la balance détaillée)."
+Une mesure réversible pour une matrice stochastique est-elle toujours une mesure invariante ?,"Oui, une mesure réversible est toujours une mesure invariante."

@@ -57,5 +57,11 @@
             "Le test F de Fisher est utilisé pour comparer les _____ de deux populations Gaussiennes indépendantes.": 1,
             "Dans un modèle Gaussien, quelle est la loi de la variable $(n-1)S_n^2 / \\sigma^2$ ?": 1
         }
+    },
+    "albinalbin": {
+        "mops2.csv": {
+            "Quelle est la relation entre la topologie faible et la topologie forte dans un espace de Hilbert $H$ de dimension finie ?": 1,
+            "Pour le problème de contrôle optimal linéaire-quadratique (LQ) sans contraintes, la fonctionnelle à minimiser $J(u)$ est la somme de quels deux termes ?": 0
+        }
     }
 }

@@ -118,30 +118,60 @@ def piocher_carte_csv(deck_name):
         
     return random.choices(cartes, weights=poids, k=1)[0]
 
-# --- ROUTES ---
+# --- ROUTES AUTHENTIFICATION ---
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    # Si déjà connecté, rediriger vers cours
+    if 'user' in session:
+        return redirect(url_for('cours'))
+    
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        action = request.form['action']
+        username = request.form.get('username', '').strip().lower()
+        password = request.form.get('password', '')
         users = charger_users()
-        if action == 'register':
-            if username in users:
-                flash("Utilisateur déjà existant !")
-            else:
-                users[username] = generate_password_hash(password)
-                sauver_users(users)
-                session['user'] = username
-                return redirect(url_for('cours'))
-        elif action == 'login':
-            if username in users and check_password_hash(users[username], password):
-                session['user'] = username
-                return redirect(url_for('cours'))
-            else:
-                flash("Identifiants incorrects")
+        
+        if not username or not password:
+            flash("Veuillez remplir tous les champs")
+        elif username in users and check_password_hash(users[username], password):
+            session['user'] = username
+            return redirect(url_for('cours'))
+        else:
+            flash("Identifiant ou mot de passe incorrect")
+    
     return render_template('login.html')
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    # Si déjà connecté, rediriger vers cours
+    if 'user' in session:
+        return redirect(url_for('cours'))
+    
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip().lower()
+        password = request.form.get('password', '')
+        password_confirm = request.form.get('password_confirm', '')
+        users = charger_users()
+        
+        # Validations
+        if not username or not password:
+            flash("Veuillez remplir tous les champs")
+        elif len(username) < 3:
+            flash("L'identifiant doit contenir au moins 3 caractères")
+        elif len(password) < 4:
+            flash("Le mot de passe doit contenir au moins 4 caractères")
+        elif password != password_confirm:
+            flash("Les mots de passe ne correspondent pas")
+        elif username in users:
+            flash("Cet identifiant est déjà pris")
+        else:
+            # Création du compte
+            users[username] = generate_password_hash(password)
+            sauver_users(users)
+            session['user'] = username
+            return redirect(url_for('cours'))
+    
+    return render_template('register.html')
 
 @app.route('/logout')
 def logout():

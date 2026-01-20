@@ -23,20 +23,25 @@
             </div>
         {% else %}
             {% for deck in decks %}
-                <div class="list-group-item d-flex justify-content-between align-items-center py-3" x-data="{ showConfirm: false }">
+                <div class="list-group-item d-flex justify-content-between align-items-center py-3" x-data="{ showConfirm: false }" @keydown.escape.window="showConfirm = false">
                     <a href="{{ url_for('flashcards_play', deck=deck) }}" 
                        class="text-decoration-none flex-grow-1 d-flex justify-content-between align-items-center">
                         <span class="fs-5 fw-bold text-dark">🎴 {{ deck }}</span>
                         <span class="badge bg-primary rounded-pill">Jouer ➡️</span>
                     </a>
                     <div class="ms-2">
-                        <button @click="showConfirm = true" class="btn btn-sm btn-outline-danger" type="button">
+                        <button @click="showConfirm = true" class="btn btn-sm btn-outline-danger" type="button" aria-label="Supprimer le deck {{ deck }}">
                             🗑️
                         </button>
                     </div>
-                    <div x-show="showConfirm" class="position-fixed top-50 start-50 translate-middle bg-white p-4 shadow rounded" style="z-index: 1050; min-width: 300px;">
-                        <h5>Confirmer la suppression</h5>
-                        <p class="text-muted">Êtes-vous sûr de vouloir supprimer le deck <strong>{{ deck }}</strong> ?</p>
+                    <div x-show="showConfirm" 
+                         role="dialog" 
+                         aria-labelledby="modal-title-{{ loop.index }}" 
+                         aria-describedby="modal-desc-{{ loop.index }}"
+                         class="position-fixed top-50 start-50 translate-middle bg-white p-4 shadow rounded" 
+                         style="z-index: 1050; min-width: 300px;">
+                        <h5 id="modal-title-{{ loop.index }}">Confirmer la suppression</h5>
+                        <p id="modal-desc-{{ loop.index }}" class="text-muted">Êtes-vous sûr de vouloir supprimer le deck <strong>{{ deck }}</strong> ?</p>
                         <div class="d-flex gap-2 justify-content-end">
                             <button @click="showConfirm = false" class="btn btn-sm btn-secondary">Annuler</button>
                             <form action="{{ url_for('delete_deck', deck_name=deck) }}" method="POST" class="d-inline">
@@ -44,7 +49,7 @@
                             </form>
                         </div>
                     </div>
-                    <div x-show="showConfirm" @click="showConfirm = false" class="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50" style="z-index: 1040;"></div>
+                    <div x-show="showConfirm" @click="showConfirm = false" class="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50" style="z-index: 1040;" aria-hidden="true"></div>
                 </div>
             {% endfor %}
         {% endif %}

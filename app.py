@@ -282,8 +282,24 @@ def vote_card():
 @login_required
 def delete_deck(deck_name):
     try:
+        # Validate deck_name to prevent path traversal attacks
+        if not deck_name or '/' in deck_name or '\\' in deck_name or '..' in deck_name:
+            flash("Nom de deck invalide")
+            return redirect(url_for('flashcards_menu'))
+        
+        # Ensure deck_name ends with .csv
+        if not deck_name.endswith('.csv'):
+            flash("Nom de deck invalide")
+            return redirect(url_for('flashcards_menu'))
+        
         deck_path = os.path.join(FLASHCARDS_DIR, deck_name)
-        if os.path.exists(deck_path) and deck_path.endswith('.csv'):
+        
+        # Verify the path is within FLASHCARDS_DIR (additional safety check)
+        if not os.path.abspath(deck_path).startswith(os.path.abspath(FLASHCARDS_DIR)):
+            flash("Accès non autorisé")
+            return redirect(url_for('flashcards_menu'))
+        
+        if os.path.exists(deck_path):
             os.remove(deck_path)
             flash(f"Le deck '{deck_name}' a été supprimé avec succès!")
         else:

@@ -8,3 +8,7 @@ flashcards.db
 
 # JSON backups
 json_backup/
+
+# Tests
+.coverage
+htmlcov/

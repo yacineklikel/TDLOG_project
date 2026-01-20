@@ -5,12 +5,28 @@ from contextlib import contextmanager
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, 'flashcards.db')
 
+# Variable globale pour permettre de changer la DB (utilisé pour les tests)
+_current_db_path = DB_PATH
+
+
+def set_database_path(path):
+    """Change le chemin de la base de données (utilisé pour les tests)"""
+    global _current_db_path
+    _current_db_path = path
+
+
+def get_database_path():
+    """Retourne le chemin actuel de la base de données"""
+    return _current_db_path
+
 
 @contextmanager
 def get_db_connection():
     """Context manager pour gérer les connexions à la base de données"""
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(_current_db_path)
     conn.row_factory = sqlite3.Row  # Pour accéder aux colonnes par nom
+    # Activer les contraintes de clés étrangères (nécessaire pour CASCADE)
+    conn.execute('PRAGMA foreign_keys = ON')
     try:
         yield conn
         conn.commit()

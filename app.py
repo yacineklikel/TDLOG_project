@@ -172,6 +172,29 @@ def login():
 
     return render_template('login.html')
 
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip().lower()
+        password = request.form.get('password', '')
+        password_confirm = request.form.get('password_confirm', '')
+        
+        users = charger_users()
+        
+        if username in users:
+            flash("Utilisateur déjà existant !")
+        elif len(password) < 4:
+            flash("Mot de passe trop court (minimum 4 caractères) !")
+        elif password != password_confirm:
+            flash("Les mots de passe ne correspondent pas !")
+        else:
+            users[username] = generate_password_hash(password)
+            sauver_users(users)
+            session['user'] = username
+            return redirect(url_for('cours'))
+    
+    return render_template('register.html')
+
 @app.route('/logout')
 def logout():
     session.pop('user', None)
@@ -254,6 +277,36 @@ def vote_card():
     sauvegarder_score_csv(deck_name, question, (resultat == 'ok'))
     nouvelle_carte = piocher_carte_csv(deck_name)
     return render_template('card_fragment.html', carte=nouvelle_carte, current_deck=deck_name)
+
+@app.route('/flashcards/delete/<deck_name>', methods=['POST'])
+@login_required
+def delete_deck(deck_name):
+    try:
+        # Validate deck_name to prevent path traversal attacks
+        if not deck_name or '/' in deck_name or '\\' in deck_name or '..' in deck_name:
+            flash("Nom de deck invalide")
+            return redirect(url_for('flashcards_menu'))
+        
+        # Ensure deck_name ends with .csv
+        if not deck_name.endswith('.csv'):
+            flash("Nom de deck invalide")
+            return redirect(url_for('flashcards_menu'))
+        
+        deck_path = os.path.join(FLASHCARDS_DIR, deck_name)
+        
+        # Verify the path is within FLASHCARDS_DIR (additional safety check)
+        if not os.path.abspath(deck_path).startswith(os.path.abspath(FLASHCARDS_DIR)):
+            flash("Accès non autorisé")
+            return redirect(url_for('flashcards_menu'))
+        
+        if os.path.exists(deck_path):
+            os.remove(deck_path)
+            flash(f"Le deck '{deck_name}' a été supprimé avec succès!")
+        else:
+            flash("Deck introuvable")
+    except Exception as e:
+        flash(f"Erreur lors de la suppression: {e}")
+    return redirect(url_for('flashcards_menu'))
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

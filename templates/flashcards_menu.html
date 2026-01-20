@@ -23,7 +23,7 @@
             </div>
         {% else %}
             {% for deck in decks %}
-                <div class="list-group-item d-flex justify-content-between align-items-center py-3" x-data="{ showConfirm: false }" @keydown.escape.window="showConfirm = false">
+                <div class="list-group-item d-flex justify-content-between align-items-center py-3" x-data="{ showConfirm: false }" @keydown.escape="showConfirm && (showConfirm = false)">
                     <a href="{{ url_for('flashcards_play', deck=deck) }}" 
                        class="text-decoration-none flex-grow-1 d-flex justify-content-between align-items-center">
                         <span class="fs-5 fw-bold text-dark">🎴 {{ deck }}</span>
@@ -36,6 +36,7 @@
                     </div>
                     <div x-show="showConfirm" 
                          role="dialog" 
+                         aria-modal="true"
                          aria-labelledby="modal-title-{{ loop.index }}" 
                          aria-describedby="modal-desc-{{ loop.index }}"
                          class="position-fixed top-50 start-50 translate-middle bg-white p-4 shadow rounded" 
@@ -49,7 +50,7 @@
                             </form>
                         </div>
                     </div>
-                    <div x-show="showConfirm" @click="showConfirm = false" class="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50" style="z-index: 1040;" aria-hidden="true"></div>
+                    <div x-show="showConfirm" @click="showConfirm = false" tabindex="-1" class="position-fixed top-0 start-0 w-100 h-100 bg-dark bg-opacity-50" style="z-index: 1040;" aria-hidden="true"></div>
                 </div>
             {% endfor %}
         {% endif %}

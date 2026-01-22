@@ -1,18 +1,19 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Mon Appli Scolaire</title>
+    <title>0b0e</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
     <script src="https://unpkg.com/htmx.org@1.9.6"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
     <script>
         window.MathJax = {
             tex: {
-                inlineMath: [['$', '$'], ['\\(', '\\)']] // Autorise les $ pour les maths
+                inlineMath: [['$', '$'], ['\\(', '\\)']]
             }
         };
     </script>
@@ -21,41 +22,359 @@
     <script>
         document.addEventListener('htmx:afterSwap', function(evt) {
             if (window.MathJax) {
-                window.MathJax.typeset(); // On demande à MathJax de relire la page
+                window.MathJax.typeset();
             }
+        });
+
+        // Gestion des icônes mathématiques
+        function initMathIcon() {
+            const mathIcons = ['∫', 'π', 'ε', '±', '∑'];
+            const randomIcon = mathIcons[Math.floor(Math.random() * mathIcons.length)];
+            const iconElements = document.querySelectorAll('#mathIcon, #mobileMathIcon');
+            iconElements.forEach(el => {
+                if (el) el.textContent = randomIcon;
+            });
+        }
+
+        // Gestion des thèmes
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+        }
+
+        function setTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            updateActiveTheme();
+        }
+
+        // Initialiser le thème et l'icône au chargement
+        initTheme();
+        document.addEventListener('DOMContentLoaded', function() {
+            initMathIcon();
+            updateActiveTheme();
         });
     </script>
 
     <style>
+        /* Thème clair (par défaut) */
+        :root[data-theme="light"] {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --border-color: #dee2e6;
+            --nav-bg: #0d6efd;
+            --nav-text: #ffffff;
+            --card-bg: #ffffff;
+            --flashcard-front: #ffffff;
+            --flashcard-back: #f8f9fa;
+            --compartment-bg: #e7f1ff;
+            --compartment-border: #b6d4fe;
+        }
+
+        /* Thème sombre */
+        :root[data-theme="dark"] {
+            --bg-primary: #1a1d24;
+            --bg-secondary: #0f1115;
+            --text-primary: #e9ecef;
+            --text-secondary: #adb5bd;
+            --border-color: #495057;
+            --nav-bg: #212529;
+            --nav-text: #ffffff;
+            --card-bg: #212529;
+            --flashcard-front: #2d3139;
+            --flashcard-back: #1f2228;
+            --compartment-bg: #2d3139;
+            --compartment-border: #495057;
+        }
+
+        /* Thème gris */
+        :root[data-theme="gray"] {
+            --bg-primary: #c7c9cc;
+            --bg-secondary: #b8babb;
+            --text-primary: #1a1d20;
+            --text-secondary: #3a3f47;
+            --border-color: #8a8d93;
+            --nav-bg: #3a3f47;
+            --nav-text: #ffffff;
+            --card-bg: #d4d6d9;
+            --flashcard-front: #d4d6d9;
+            --flashcard-back: #c7c9cc;
+            --compartment-bg: #a8aaad;
+            --compartment-border: #8a8d93;
+        }
+
         body {
             padding-top: 70px;
             padding-bottom: 80px;
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: background-color 0.3s, color 0.3s;
         }
+
+        .bg-light {
+            background-color: var(--bg-secondary) !important;
+        }
+
+        .text-muted {
+            color: var(--text-secondary) !important;
+        }
+
+        /* Streak flame icon */
+        .streak-container {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-left: 15px;
+            padding: 4px 10px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .flame-icon {
+            font-size: 1.2rem;
+            transition: all 0.3s;
+        }
+
+        .flame-icon.active {
+            filter: hue-rotate(0deg);
+        }
+
+        .flame-icon.inactive {
+            filter: grayscale(100%);
+            opacity: 0.4;
+        }
+
+        .streak-count {
+            font-weight: bold;
+            color: white;
+        }
+
         .mobile-nav {
-            background: white;
-            border-top: 1px solid #dee2e6;
+            background: var(--card-bg);
+            border-top: 1px solid var(--border-color);
             box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
             z-index: 1030;
+            transition: background-color 0.3s;
         }
+
         .nav-link.active {
             color: #0d6efd !important;
             font-weight: bold;
         }
+
         .nav-link {
-            color: #6c757d;
+            color: var(--text-secondary);
         }
-        /* Petit ajustement pour que les maths ne cassent pas la mise en page */
+
         mjx-container {
             font-size: 110% !important;
+        }
+
+        /* Navbar principale */
+        .navbar-dark {
+            background: var(--nav-bg) !important;
+        }
+
+        /* Menu des paramètres */
+        .settings-dropdown {
+            position: relative;
+        }
+
+        .settings-btn {
+            background: none;
+            border: none;
+            color: var(--nav-text);
+            font-size: 1.25rem;
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+        }
+
+        .settings-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .settings-menu {
+            display: none;
+            position: absolute;
+            right: 0;
+            top: calc(100% + 10px);
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            min-width: 200px;
+            padding: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+        }
+
+        .settings-menu.show {
+            display: block;
+        }
+
+        .settings-menu-header {
+            padding: 8px 12px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .theme-submenu {
+            display: none;
+            padding-left: 12px;
+            margin-top: 4px;
+        }
+
+        .theme-submenu.show {
+            display: block;
+        }
+
+        .theme-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 4px;
+        }
+
+        .theme-header:hover {
+            background-color: var(--bg-secondary);
+        }
+
+        .theme-arrow {
+            transition: transform 0.3s;
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            opacity: 0.5;
+        }
+
+        .theme-arrow.rotated {
+            transform: rotate(90deg);
+        }
+
+        .theme-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            color: var(--text-primary);
+            outline: none;
+            border: none;
+        }
+
+        .theme-option:hover {
+            background-color: var(--bg-secondary);
+        }
+
+        .theme-option:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+        .theme-option.active {
+            background-color: rgba(13, 110, 253, 0.15);
+            font-weight: 500;
+            border-left: 3px solid #0d6efd;
+        }
+
+        /* Styles pour les cartes avec thème adaptatif */
+        .card {
+            background-color: var(--card-bg) !important;
+            border-color: var(--border-color) !important;
+            color: var(--text-primary) !important;
+        }
+
+        .list-group-item {
+            background-color: var(--card-bg) !important;
+            border-color: var(--border-color) !important;
+            color: var(--text-primary) !important;
+        }
+
+        /* Icônes de thème supprimées pour sobriété */
+
+        /* Mobile settings button */
+        .mobile-settings {
+            position: fixed;
+            bottom: 70px;
+            right: 20px;
+            z-index: 1020;
+        }
+
+        .mobile-settings-btn {
+            background: var(--nav-bg);
+            color: var(--nav-text);
+            border: none;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            font-size: 1.25rem;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .mobile-settings-menu {
+            display: none;
+            position: fixed;
+            bottom: 130px;
+            right: 20px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            min-width: 200px;
+            padding: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1020;
+        }
+
+        .mobile-settings-menu.show {
+            display: block;
+        }
+
+        @media (max-width: 767px) {
+            .mobile-settings {
+                display: block;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .mobile-settings {
+                display: none;
+            }
         }
     </style>
 </head>
 <body class="bg-light">
 
+    <!-- Navbar Desktop -->
     <nav class="navbar navbar-dark bg-primary fixed-top d-none d-md-block">
         <div class="container d-flex justify-content-between align-items-center">
             
-            <a class="navbar-brand fw-bold" href="{{ url_for('cours') }}">🎓 Mon Appli</a>
+            <div class="d-flex align-items-center">
+                <a class="navbar-brand fw-bold" href="{{ url_for('cours') }}">
+                    <span id="mathIcon"></span> 0b0e
+                </a>
+                {% if session.get('user') %}
+                <div class="streak-container">
+                    <span class="flame-icon {{ 'active' if streak > 0 else 'inactive' }}">🔥</span>
+                    <span class="streak-count">{{ streak or 0 }}</span>
+                </div>
+                {% endif %}
+            </div>
 
             <div class="d-flex gap-3 align-items-center">
                 <a class="btn {% if page == 'cours' %}btn-light text-primary{% else %}btn-outline-light{% endif %}" 
@@ -67,6 +386,55 @@
                 <a class="btn {% if page == 'fiches' %}btn-light text-primary{% else %}btn-outline-light{% endif %}" 
                    href="{{ url_for('fiches') }}">Fiches</a>
                 
+                <!-- Menu Paramètres Desktop -->
+                <div class="settings-dropdown">
+                    <button class="settings-btn" onclick="toggleSettings(event)">
+                        ⋯
+                    </button>
+                    <div class="settings-menu" id="settingsMenu">
+                        <!-- Thème (cliquable pour dévoiler les options) -->
+                        <div class="theme-header" onclick="toggleThemeSubmenu(event)">
+                            <span>Thème</span>
+                            <span class="theme-arrow" id="themeArrow">▶</span>
+                        </div>
+                        <div class="theme-submenu" id="themeSubmenu">
+                            <div class="theme-option" onclick="setTheme('light')">
+                                <span>Clair</span>
+                            </div>
+                            <div class="theme-option" onclick="setTheme('dark')">
+                                <span>Sombre</span>
+                            </div>
+                            <div class="theme-option" onclick="setTheme('gray')">
+                                <span>Gris</span>
+                            </div>
+                        </div>
+
+                        <!-- Séparateur -->
+                        <hr class="my-2">
+
+                        <!-- Prompt -->
+                        <a href="{{ url_for('prompt_settings') }}" class="theme-option" style="color: inherit; text-decoration: none;">
+                            <span>Prompt IA</span>
+                        </a>
+
+                        <!-- Statistiques -->
+                        <a href="{{ url_for('statistics') }}" class="theme-option" style="color: inherit; text-decoration: none;">
+                            <span>Statistiques</span>
+                        </a>
+
+                        <!-- Classement -->
+                        <a href="{{ url_for('leaderboard') }}" class="theme-option" style="color: inherit; text-decoration: none;">
+                            <span>Classement</span>
+                        </a>
+
+                        <!-- Tous les paramètres -->
+                        <hr class="my-2">
+                        <a href="{{ url_for('parametres') }}" class="theme-option" style="color: inherit; text-decoration: none;">
+                            <span>Paramètres</span>
+                        </a>
+                    </div>
+                </div>
+
                 {% if session.get('user') %}
                     <div class="border-start border-white ps-3 ms-2">
                         <a href="{{ url_for('logout') }}" class="btn btn-danger btn-sm">
@@ -82,26 +450,130 @@
         {% block content %}{% endblock %}
     </div>
 
+    <!-- Navbar Mobile -->
     <nav class="mobile-nav fixed-bottom d-md-none">
         <div class="d-flex justify-content-around py-2">
             
             <a href="{{ url_for('cours') }}" class="nav-link text-center {% if page == 'cours' %}active{% endif %}">
-                <div class="fs-4">📚</div>
-                <small style="font-size: 0.7rem;">Cours</small>
+                <small>Cours</small>
             </a>
 
             <a href="{{ url_for('flashcards_menu') }}" class="nav-link text-center {% if page == 'flashcards' %}active{% endif %}">
-                <div class="fs-4">⚡</div>
-                <small style="font-size: 0.7rem;">Flashcards</small>
+                <small>Flashcards</small>
             </a>
 
             <a href="{{ url_for('fiches') }}" class="nav-link text-center {% if page == 'fiches' %}active{% endif %}">
-                <div class="fs-4">📝</div>
-                <small style="font-size: 0.7rem;">Fiches</small>
+                <small>Fiches</small>
             </a>
-
         </div>
     </nav>
+
+    <!-- Menu Paramètres Mobile -->
+    <div class="mobile-settings d-md-none">
+        <button class="mobile-settings-btn" onclick="toggleMobileSettings(event)">
+            ⋯
+        </button>
+        <div class="mobile-settings-menu" id="mobileSettingsMenu">
+            <!-- Thème (cliquable pour dévoiler les options) -->
+            <div class="theme-header" onclick="toggleMobileThemeSubmenu(event)">
+                <span>Thème</span>
+                <span class="theme-arrow" id="mobileThemeArrow">▶</span>
+            </div>
+            <div class="theme-submenu" id="mobileThemeSubmenu">
+                <div class="theme-option" onclick="setTheme('light')">
+                    <span>Clair</span>
+                </div>
+                <div class="theme-option" onclick="setTheme('dark')">
+                    <span>Sombre</span>
+                </div>
+                <div class="theme-option" onclick="setTheme('gray')">
+                    <span>Gris</span>
+                </div>
+            </div>
+
+            <!-- Séparateur -->
+            <hr class="my-2">
+
+            <!-- Prompt -->
+            <a href="{{ url_for('prompt_settings') }}" class="theme-option" style="color: inherit; text-decoration: none;">
+                <span>Prompt IA</span>
+            </a>
+
+            <!-- Statistiques -->
+            <a href="{{ url_for('statistics') }}" class="theme-option" style="color: inherit; text-decoration: none;">
+                <span>Statistiques</span>
+            </a>
+
+            <!-- Classement -->
+            <a href="{{ url_for('leaderboard') }}" class="theme-option" style="color: inherit; text-decoration: none;">
+                <span>Classement</span>
+            </a>
+
+            <!-- Tous les paramètres -->
+            <hr class="my-2">
+            <a href="{{ url_for('parametres') }}" class="theme-option" style="color: inherit; text-decoration: none;">
+                <span>Paramètres</span>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        function toggleSettings(e) {
+            e.stopPropagation();
+            const menu = document.getElementById('settingsMenu');
+            menu.classList.toggle('show');
+        }
+
+        function toggleMobileSettings(e) {
+            e.stopPropagation();
+            const menu = document.getElementById('mobileSettingsMenu');
+            menu.classList.toggle('show');
+        }
+
+        function toggleThemeSubmenu(e) {
+            e.stopPropagation();
+            const submenu = document.getElementById('themeSubmenu');
+            const arrow = document.getElementById('themeArrow');
+            submenu.classList.toggle('show');
+            arrow.classList.toggle('rotated');
+        }
+
+        function toggleMobileThemeSubmenu(e) {
+            e.stopPropagation();
+            const submenu = document.getElementById('mobileThemeSubmenu');
+            const arrow = document.getElementById('mobileThemeArrow');
+            submenu.classList.toggle('show');
+            arrow.classList.toggle('rotated');
+        }
+
+        // Fermer les menus en cliquant ailleurs
+        document.addEventListener('click', function() {
+            document.getElementById('settingsMenu').classList.remove('show');
+            document.getElementById('mobileSettingsMenu').classList.remove('show');
+            // Fermer aussi les sous-menus de thème
+            document.getElementById('themeSubmenu').classList.remove('show');
+            document.getElementById('mobileThemeSubmenu').classList.remove('show');
+            document.getElementById('themeArrow').classList.remove('rotated');
+            document.getElementById('mobileThemeArrow').classList.remove('rotated');
+        });
+
+        // Mettre à jour l'affichage du thème actif
+        function updateActiveTheme() {
+            const currentTheme = localStorage.getItem('theme') || 'light';
+            document.querySelectorAll('.theme-option').forEach(opt => {
+                opt.classList.remove('active');
+                const optText = opt.textContent.trim().toLowerCase();
+                const themeNames = {
+                    'light': 'clair',
+                    'dark': 'sombre',
+                    'gray': 'gris'
+                };
+                if (optText === themeNames[currentTheme]) {
+                    opt.classList.add('active');
+                }
+            });
+        }
+    </script>
 
 </body>
 </html>

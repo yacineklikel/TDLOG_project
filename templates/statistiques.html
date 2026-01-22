@@ -1,0 +1,277 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container" style="max-width: 1000px;">
+    <h1 class="mb-4 mt-2"> Statistiques de Révision</h1>
+
+    <!-- Statistiques globales -->
+    <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+            <div class="card text-center border-primary" style="background-color: var(--card-bg); color: var(--text-primary);">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2" style="color: var(--text-primary); opacity: 0.7;">Total Decks</h6>
+                    <h2 class="card-title text-primary mb-0">{{ stats.global.total_decks }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center border-info" style="background-color: var(--card-bg); color: var(--text-primary);">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2" style="color: var(--text-primary); opacity: 0.7;">Total Cartes</h6>
+                    <h2 class="card-title text-info mb-0">{{ stats.global.total_cards }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center border-success" style="background-color: var(--card-bg); color: var(--text-primary);">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2" style="color: var(--text-primary); opacity: 0.7;">Cartes Étudiées</h6>
+                    <h2 class="card-title text-success mb-0">{{ stats.global.cards_studied }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+            <div class="card text-center border-warning" style="background-color: var(--card-bg); color: var(--text-primary);">
+                <div class="card-body">
+                    <h6 class="card-subtitle mb-2" style="color: var(--text-primary); opacity: 0.7;">À Réviser</h6>
+                    <h2 class="card-title text-warning mb-0">{{ stats.global.cards_due }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Calendrier annuel -->
+    <div class="card mb-4" style="background-color: var(--card-bg); border-color: var(--compartment-border);">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">📅 Calendrier d'activité {{ year_activity.year }}</h5>
+        </div>
+        <div class="card-body" style="color: var(--text-primary);">
+            <div class="activity-calendar">
+                {% for month_name, weeks in year_activity.calendar %}
+                <div class="month-container">
+                    <div class="month-label">{{ month_name }}</div>
+                    <div class="weeks-grid">
+                        {% for week in weeks %}
+                        <div class="week-row">
+                            {% for day in week %}
+                            {% if day %}
+                            <div class="day-cell {{ day.status }}"
+                                 style="background-color: {{ day.color }};"
+                                 title="{{ day.date }}: {{ day.cards }} carte(s) révisée(s){% if day.completed %} - Toutes les cartes terminées!{% endif %}">
+                            </div>
+                            {% else %}
+                            <div class="day-cell empty"></div>
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="calendar-legend mt-3">
+                <small style="color: var(--text-primary); opacity: 0.7;">
+                    <span class="legend-item"><span class="legend-box" style="background-color: #ebedf0;"></span> Aucune révision</span>
+                    <span class="legend-item"><span class="legend-box" style="background-color: #9be9a8;"></span> Révisions partielles</span>
+                    <span class="legend-item"><span class="legend-box" style="background-color: #40c463;"></span> Toutes les cartes terminées</span>
+                </small>
+            </div>
+        </div>
+    </div>
+
+    <style>
+        .activity-calendar {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 10px 0;
+        }
+
+        .month-container {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .month-label {
+            font-size: 0.7rem;
+            font-weight: bold;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .weeks-grid {
+            display: flex;
+            gap: 2px;
+        }
+
+        .week-row {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .day-cell {
+            width: 11px;
+            height: 11px;
+            border-radius: 2px;
+            transition: all 0.2s;
+        }
+
+        .day-cell:not(.empty):hover {
+            transform: scale(1.3);
+            box-shadow: 0 0 4px rgba(0,0,0,0.3);
+            z-index: 10;
+            position: relative;
+        }
+
+        .day-cell.empty {
+            background-color: transparent;
+        }
+
+        .calendar-legend {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .legend-box {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            border: 1px solid #d1d5da;
+        }
+    </style>
+
+    <!-- Activité du jour -->
+    <div class="card mb-4 border-success" style="background-color: var(--card-bg);">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0">📅 Aujourd'hui</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h3 class="text-success">{{ stats.today.cards_today }}</h3>
+                    <p style="color: var(--text-primary); opacity: 0.7;" class="mb-0">cartes révisées aujourd'hui</p>
+                </div>
+                <div class="col-md-6 text-end">
+                    {% if stats.global.cards_due > 0 %}
+                        <a href="{{ url_for('flashcards_menu') }}" class="btn btn-success">
+                             Continuer à réviser
+                        </a>
+                    {% else %}
+                        <span style="color: var(--text-primary); opacity: 0.7;"> Aucune carte à réviser !</span>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Répartition des cartes -->
+    <div class="card mb-4" style="background-color: var(--card-bg); border-color: var(--compartment-border);">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">🎯 Répartition des Cartes</h5>
+        </div>
+        <div class="card-body">
+            <div class="row text-center">
+                <div class="col-md-4 mb-3">
+                    <div class="p-3 border rounded" style="background-color: var(--bg-primary); border-color: var(--compartment-border) !important;">
+                        <h4 class="text-warning mb-1">{{ stats.global.cards_learning }}</h4>
+                        <small style="color: var(--text-primary); opacity: 0.7;">En apprentissage</small>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="p-3 border rounded" style="background-color: var(--bg-primary); border-color: var(--compartment-border) !important;">
+                        <h4 class="text-success mb-1">{{ stats.global.cards_mature }}</h4>
+                        <small style="color: var(--text-primary); opacity: 0.7;">Cartes matures</small>
+                    </div>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <div class="p-3 border rounded" style="background-color: var(--bg-primary); border-color: var(--compartment-border) !important;">
+                        <h4 style="color: var(--text-primary);" class="mb-1">{{ stats.global.total_cards - stats.global.cards_studied }}</h4>
+                        <small style="color: var(--text-primary); opacity: 0.7;">Jamais vues</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistiques par deck -->
+    <div class="card mb-4" style="background-color: var(--card-bg); border-color: var(--compartment-border);">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0"> Statistiques par Deck</h5>
+        </div>
+        <div class="card-body">
+            {% if stats.decks|length == 0 %}
+                <p style="color: var(--text-primary); opacity: 0.7;" class="text-center my-4">Aucun deck trouvé. Générez des flashcards depuis vos cours !</p>
+            {% else %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr style="color: var(--text-primary);">
+                                <th>Deck</th>
+                                <th class="text-center">Total</th>
+                                <th class="text-center">Étudiées</th>
+                                <th class="text-center">À réviser</th>
+                                <th class="text-center">Apprentissage</th>
+                                <th class="text-center">Matures</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for deck in stats.decks %}
+                            <tr style="color: var(--text-primary);">
+                                <td><strong>{{ deck.deck_name }}</strong></td>
+                                <td class="text-center">{{ deck.total }}</td>
+                                <td class="text-center">{{ deck.studied }}</td>
+                                <td class="text-center">
+                                    <span class="badge bg-warning">{{ deck.due }}</span>
+                                </td>
+                                <td class="text-center">{{ deck.learning }}</td>
+                                <td class="text-center">{{ deck.mature }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Activité des 30 derniers jours -->
+    <div class="card mb-4" style="background-color: var(--card-bg); border-color: var(--compartment-border);">
+        <div class="card-header bg-secondary text-white">
+            <h5 class="mb-0"> Activité des 30 derniers jours</h5>
+        </div>
+        <div class="card-body">
+            {% if stats.activity|length == 0 %}
+                <p style="color: var(--text-primary); opacity: 0.7;" class="text-center my-4">Aucune activité récente. Commencez à réviser pour voir vos statistiques !</p>
+            {% else %}
+                <div class="row">
+                    {% for day in stats.activity %}
+                    <div class="col-md-3 mb-2">
+                        <div class="d-flex justify-content-between align-items-center p-2 border rounded" style="background-color: var(--bg-primary); border-color: var(--compartment-border) !important;">
+                            <small style="color: var(--text-primary); opacity: 0.7;">{{ day.date }}</small>
+                            <span class="badge bg-primary">{{ day.cards_reviewed }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Retour -->
+    <div class="text-center mt-4 mb-4">
+        <a href="{{ url_for('parametres') }}" class="btn btn-secondary">
+             Retour aux paramètres
+        </a>
+    </div>
+</div>
+{% endblock %}

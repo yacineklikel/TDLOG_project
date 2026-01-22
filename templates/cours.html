@@ -2,13 +2,35 @@
 
 {% block content %}
 
-    <div class="row justify-content-center">
-        <div class="col-md-8 col-lg-6"> <h1 class="text-center mb-4 mt-2">Mes Cours PDF 📚</h1>
+    <style>
+        /* Assurer une hauteur cohérente pour tous les items de la liste */
+        .pdf-item {
+            min-height: 60px;
+        }
 
-            <div class="card mb-4 border-primary shadow-sm">
-                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                    <span>🏛️ Documents Officiels</span>
-                    <span class="badge bg-white text-primary">{{ originaux|length }}</span>
+        .pdf-filename {
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .pdf-actions {
+            flex-shrink: 0;
+            white-space: nowrap;
+        }
+    </style>
+
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6"> <h1 class="text-center mb-4 mt-2">Mes cours</h1>
+
+            <!-- Alert pour les messages -->
+            <div id="alertContainer"></div>
+
+            <div class="card mb-4 shadow-sm" style="border-color: var(--compartment-border);">
+                <div class="card-header d-flex justify-content-between align-items-center" style="background-color: var(--compartment-bg); color: var(--text-primary); border-color: var(--compartment-border);">
+                    <span> Documents Officiels</span>
+                    <span class="badge" style="background-color: var(--card-bg); color: var(--text-primary);">{{ originaux|length }}</span>
                 </div>
                 <div class="list-group list-group-flush">
                     {% if originaux|length == 0 %}
@@ -17,10 +39,9 @@
                         </div>
                     {% else %}
                         {% for fichier in originaux %}
-                            <a href="{{ url_for('static', filename='pdfs/cours/originaux/' + fichier) }}" 
-                               class="list-group-item list-group-item-action py-3" target="_blank">
+                            <a href="{{ url_for('static', filename='pdfs/cours/originaux/' + fichier) }}"
+                               class="list-group-item list-group-item-action pdf-item" target="_blank">
                                 <div class="d-flex align-items-center">
-                                    <span class="fs-4 me-3">📄</span>
                                     <span class="fw-bold">{{ fichier }}</span>
                                 </div>
                             </a>
@@ -39,10 +60,10 @@
                 </form>
             </div>
 
-            <div class="card border-success shadow-sm mb-5">
-                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
-                    <span>👤 Vos Téléchargements</span>
-                    <span class="badge bg-white text-success">{{ uploads|length }}</span>
+            <div class="card shadow-sm mb-5" style="border-color: var(--compartment-border);">
+                <div class="card-header d-flex justify-content-between align-items-center" style="background-color: var(--compartment-bg); color: var(--text-primary); border-color: var(--compartment-border);">
+                    <span> Vos Téléchargements</span>
+                    <span class="badge" style="background-color: var(--card-bg); color: var(--text-primary);">{{ uploads|length }}</span>
                 </div>
                 <div class="list-group list-group-flush">
                     {% if uploads|length == 0 %}
@@ -51,16 +72,31 @@
                         </div>
                     {% else %}
                         {% for fichier in uploads %}
-                            <a href="{{ url_for('static', filename='pdfs/cours/uploads/' + fichier) }}" 
-                               class="list-group-item list-group-item-action py-3" target="_blank">
-                                <div class="d-flex align-items-center justify-content-between w-100">
-                                    <div class="d-flex align-items-center overflow-hidden">
-                                        <span class="fs-4 me-3">📂</span>
-                                        <span class="text-truncate">{{ fichier }}</span>
+                            <div class="list-group-item pdf-item">
+                                <div class="d-flex align-items-center justify-content-between w-100 gap-3">
+                                    <div class="pdf-filename" title="{{ fichier }}">
+                                        {{ fichier }}
                                     </div>
-                                    <small class="text-success fw-bold">Ouvrir</small>
+                                    <div class="d-flex gap-2 pdf-actions">
+                                        <a href="{{ url_for('static', filename='pdfs/cours/uploads/' + fichier) }}"
+                                           class="btn btn-sm btn-outline-success" target="_blank">
+                                            Ouvrir
+                                        </a>
+                                        <button class="btn btn-sm btn-primary"
+                                                onclick="ouvrirModalFlashcards('{{ fichier }}', 'cours', 'uploads')">
+                                             Générer flashcards
+                                        </button>
+                                        <button class="btn btn-sm btn-info"
+                                                onclick="ouvrirModalFiche('{{ fichier }}', 'cours', 'uploads')">
+                                             Générer fiche
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-danger"
+                                                onclick="supprimerPdf('{{ fichier }}')">
+                                             Supprimer
+                                        </button>
+                                    </div>
                                 </div>
-                            </a>
+                            </div>
                         {% endfor %}
                     {% endif %}
                 </div>
@@ -68,5 +104,368 @@
 
         </div>
     </div>
+
+    <!-- Modal pour générer une fiche résumé -->
+    <div class="modal fade" id="modalFiche" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"> Générer une fiche résumé</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formGenererFiche">
+                        <input type="hidden" id="fichePdfFilename" name="pdfFilename">
+                        <input type="hidden" id="ficheCategorie" name="categorie">
+                        <input type="hidden" id="ficheSource" name="source">
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Fichier PDF</label>
+                            <input type="text" class="form-control" id="ficheDisplayPdfName" disabled>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="ficheNom" class="form-label fw-bold">Nom de la fiche</label>
+                            <input type="text" class="form-control" id="ficheNom" name="ficheNom"
+                                   placeholder="Ex: resume_statistiques" required>
+                            <small class="text-muted">Ce nom sera utilisé pour identifier votre fiche</small>
+                        </div>
+
+                        <div class="alert alert-info mb-0">
+                            <small>
+                                <strong> Info:</strong> La fiche résumé contiendra uniquement les définitions, propriétés et exemples importants du document.
+                            </small>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-info" onclick="genererFiche()" id="btnGenererFiche">
+                        <span id="btnFicheText">Générer</span>
+                        <span id="btnFicheSpinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal pour générer les flashcards -->
+    <div class="modal fade" id="modalFlashcards" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"> Générer des flashcards</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formGenererFlashcards">
+                        <input type="hidden" id="pdfFilename" name="pdfFilename">
+                        <input type="hidden" id="categorie" name="categorie">
+                        <input type="hidden" id="source" name="source">
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Fichier PDF</label>
+                            <input type="text" class="form-control" id="displayPdfName" disabled>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="nomDeck" class="form-label fw-bold">Nom du deck de flashcards</label>
+                            <input type="text" class="form-control" id="nomDeck" name="nomDeck"
+                                   placeholder="Ex: statistiques_chap1" required>
+                            <small class="text-muted">Ce nom sera utilisé pour identifier votre deck</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="nbFlashcards" class="form-label fw-bold">Nombre de flashcards</label>
+                            <input type="number" class="form-control" id="nbFlashcards" name="nbFlashcards"
+                                   value="10" min="5" max="500" required>
+                            <small class="text-muted">Entre 5 et 500 flashcards</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">
+                                Sélection de pages (optionnel)
+                                <span class="badge bg-secondary">Nouveau</span>
+                            </label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <input type="number" class="form-control" id="pageDebut" name="pageDebut"
+                                           placeholder="Page de début" min="1">
+                                </div>
+                                <div class="col-md-6">
+                                    <input type="number" class="form-control" id="pageFin" name="pageFin"
+                                           placeholder="Page de fin" min="1">
+                                </div>
+                            </div>
+                            <small class="text-muted">Laissez vide pour utiliser tout le document</small>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="ephemeralPrompt" class="form-label fw-bold">
+                                Prompt éphémère (optionnel)
+                                <span class="badge bg-info">Avancé</span>
+                            </label>
+                            <textarea class="form-control font-monospace" id="ephemeralPrompt" name="ephemeralPrompt" rows="4" placeholder="Laissez vide pour utiliser votre prompt personnel ou le prompt par défaut..."></textarea>
+                            <small class="text-muted">
+                                Ce prompt sera utilisé uniquement pour cette génération. Variables : <code>{nb_flashcards}</code>, <code>{texte}</code>
+                            </small>
+                        </div>
+
+                        <div class="alert alert-info mb-0">
+                            <small>
+                                <strong> Info:</strong> La génération utilise l'API configurée dans <code>config.py</code>.
+                                Si aucune clé API n'est configurée, des flashcards d'exemple seront générées pour tester le système.
+                            </small>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" onclick="genererFlashcards()" id="btnGenerer">
+                        <span id="btnText">Générer</span>
+                        <span id="btnSpinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let modalFlashcards;
+        let modalFiche;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            modalFlashcards = new bootstrap.Modal(document.getElementById('modalFlashcards'));
+            modalFiche = new bootstrap.Modal(document.getElementById('modalFiche'));
+        });
+
+        function ouvrirModalFiche(filename, categorie, source) {
+            document.getElementById('fichePdfFilename').value = filename;
+            document.getElementById('ficheCategorie').value = categorie;
+            document.getElementById('ficheSource').value = source;
+            document.getElementById('ficheDisplayPdfName').value = filename;
+
+            // Suggérer un nom de fiche basé sur le nom du fichier
+            const nomSuggere = 'resume_' + filename.replace('.pdf', '').toLowerCase()
+                .replace(/[^a-z0-9]/g, '_');
+            document.getElementById('ficheNom').value = nomSuggere;
+
+            modalFiche.show();
+        }
+
+        function ouvrirModalFlashcards(filename, categorie, source) {
+            document.getElementById('pdfFilename').value = filename;
+            document.getElementById('categorie').value = categorie;
+            document.getElementById('source').value = source;
+            document.getElementById('displayPdfName').value = filename;
+
+            // Suggérer un nom de deck basé sur le nom du fichier
+            const nomSuggere = filename.replace('.pdf', '').toLowerCase()
+                .replace(/[^a-z0-9]/g, '_');
+            document.getElementById('nomDeck').value = nomSuggere;
+
+            modalFlashcards.show();
+        }
+
+        function afficherMessage(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.role = 'alert';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.getElementById('alertContainer').appendChild(alertDiv);
+
+            // Auto-dismiss après 5 secondes
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+
+        async function genererFlashcards() {
+            const btnGenerer = document.getElementById('btnGenerer');
+            const btnText = document.getElementById('btnText');
+            const btnSpinner = document.getElementById('btnSpinner');
+
+            // Récupération des valeurs
+            const pdfFilename = document.getElementById('pdfFilename').value;
+            const categorie = document.getElementById('categorie').value;
+            const source = document.getElementById('source').value;
+            const nomDeck = document.getElementById('nomDeck').value.trim();
+            const nbFlashcards = document.getElementById('nbFlashcards').value;
+            const ephemeralPrompt = document.getElementById('ephemeralPrompt').value.trim();
+            const pageDebut = document.getElementById('pageDebut').value.trim();
+            const pageFin = document.getElementById('pageFin').value.trim();
+
+            if (!nomDeck) {
+                afficherMessage('Veuillez remplir le nom du deck', 'warning');
+                return;
+            }
+
+            // Validation des pages
+            if ((pageDebut && !pageFin) || (!pageDebut && pageFin)) {
+                afficherMessage('Veuillez remplir les deux champs de sélection de pages ou aucun', 'warning');
+                return;
+            }
+
+            if (pageDebut && pageFin && parseInt(pageDebut) > parseInt(pageFin)) {
+                afficherMessage('La page de début doit être inférieure ou égale à la page de fin', 'warning');
+                return;
+            }
+
+            // Désactiver le bouton et afficher le spinner
+            btnGenerer.disabled = true;
+            btnText.classList.add('d-none');
+            btnSpinner.classList.remove('d-none');
+
+            try {
+                const requestData = {
+                    pdf_filename: pdfFilename,
+                    categorie: categorie,
+                    source: source,
+                    nb_flashcards: parseInt(nbFlashcards),
+                    nom_deck: nomDeck
+                };
+
+                // Ajouter la sélection de pages si fournie
+                if (pageDebut && pageFin) {
+                    requestData.page_debut = parseInt(pageDebut);
+                    requestData.page_fin = parseInt(pageFin);
+                }
+
+                // Ajouter le prompt éphémère s'il est fourni
+                if (ephemeralPrompt) {
+                    requestData.ephemeral_prompt = ephemeralPrompt;
+                }
+
+                const response = await fetch('/api/generer-flashcards', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    afficherMessage(
+                        ` ${data.message}! Vous pouvez maintenant accéder au deck "${data.deck_name}" depuis le menu Flashcards.`,
+                        'success'
+                    );
+                    modalFlashcards.hide();
+                    // Réinitialiser le formulaire
+                    document.getElementById('formGenererFlashcards').reset();
+                } else {
+                    afficherMessage(` Erreur: ${data.error}`, 'danger');
+                }
+            } catch (error) {
+                afficherMessage(` Erreur réseau: ${error.message}`, 'danger');
+            } finally {
+                // Réactiver le bouton
+                btnGenerer.disabled = false;
+                btnText.classList.remove('d-none');
+                btnSpinner.classList.add('d-none');
+            }
+        }
+
+        async function genererFiche() {
+            const btnGenererFiche = document.getElementById('btnGenererFiche');
+            const btnFicheText = document.getElementById('btnFicheText');
+            const btnFicheSpinner = document.getElementById('btnFicheSpinner');
+
+            // Récupération des valeurs
+            const pdfFilename = document.getElementById('fichePdfFilename').value;
+            const categorie = document.getElementById('ficheCategorie').value;
+            const source = document.getElementById('ficheSource').value;
+            const ficheNom = document.getElementById('ficheNom').value.trim();
+
+            if (!ficheNom) {
+                afficherMessage('Veuillez remplir le nom de la fiche', 'warning');
+                return;
+            }
+
+            // Désactiver le bouton et afficher le spinner
+            btnGenererFiche.disabled = true;
+            btnFicheText.classList.add('d-none');
+            btnFicheSpinner.classList.remove('d-none');
+
+            try {
+                const requestData = {
+                    pdf_filename: pdfFilename,
+                    categorie: categorie,
+                    source: source,
+                    fiche_nom: ficheNom
+                };
+
+                const response = await fetch('/api/generer-fiche', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(requestData)
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    afficherMessage(
+                        ` ${data.message}! Vous pouvez télécharger la fiche résumé.`,
+                        'success'
+                    );
+                    modalFiche.hide();
+                    // Réinitialiser le formulaire
+                    document.getElementById('formGenererFiche').reset();
+
+                    // Télécharger la fiche
+                    window.open(data.download_url, '_blank');
+                } else {
+                    afficherMessage(` Erreur: ${data.error}`, 'danger');
+                }
+            } catch (error) {
+                afficherMessage(` Erreur réseau: ${error.message}`, 'danger');
+            } finally {
+                // Réactiver le bouton
+                btnGenererFiche.disabled = false;
+                btnFicheText.classList.remove('d-none');
+                btnFicheSpinner.classList.add('d-none');
+            }
+        }
+
+        async function supprimerPdf(filename) {
+            if (!confirm(`Êtes-vous sûr de vouloir supprimer "${filename}" ?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/supprimer-pdf', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        filename: filename,
+                        categorie: 'cours',
+                        source: 'uploads'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    afficherMessage(` ${data.message}`, 'success');
+                    // Recharger la page pour actualiser la liste
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    afficherMessage(` Erreur: ${data.error}`, 'danger');
+                }
+            } catch (error) {
+                afficherMessage(` Erreur réseau: ${error.message}`, 'danger');
+            }
+        }
+    </script>
 
 {% endblock %}

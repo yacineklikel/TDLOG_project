@@ -1,3 +1,18 @@
 venv_TDLOG_projet/
 __pycache__/
 *.pyc
+
+# Configuration (contient les clés API)
+config.py
+
+# SQLite database
+*.db
+flashcards.db
+
+# JSON backups
+json_backup/
+
+# Tests
+.coverage
+htmlcov/
+flashcards.db.backup_*

@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container" style="max-width: 800px;">
+    <h1 class="mb-4 mt-2"> Paramètres</h1>
+
+    <!-- Thème -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"> Thème</h5>
+        </div>
+        <div class="card-body">
+            <p class="text-muted mb-3">Choisissez l'apparence de l'application</p>
+            <div class="btn-group w-100" role="group">
+                <input type="radio" class="btn-check" name="theme" id="theme-light" value="light" autocomplete="off">
+                <label class="btn btn-outline-primary" for="theme-light" onclick="setTheme('light')">
+                    ☀️ Clair
+                </label>
+
+                <input type="radio" class="btn-check" name="theme" id="theme-dark" value="dark" autocomplete="off">
+                <label class="btn btn-outline-primary" for="theme-dark" onclick="setTheme('dark')">
+                    🌙 Sombre
+                </label>
+
+                <input type="radio" class="btn-check" name="theme" id="theme-gray" value="gray" autocomplete="off">
+                <label class="btn btn-outline-primary" for="theme-gray" onclick="setTheme('gray')">
+                    ⚪ Gris
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <!-- Prompt IA -->
+    <div class="card mb-4">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0"> Prompt IA</h5>
+        </div>
+        <div class="card-body">
+            <p class="text-muted mb-3">Personnalisez les instructions données à l'IA pour générer vos flashcards</p>
+            <a href="{{ url_for('prompt_settings') }}" class="btn btn-success">
+                 Modifier le prompt personnalisé
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistiques -->
+    <div class="card mb-4">
+        <div class="card-header bg-info text-white">
+            <h5 class="mb-0"> Statistiques</h5>
+        </div>
+        <div class="card-body">
+            <p class="text-muted mb-3">Consultez vos statistiques de révision et votre progression</p>
+            <a href="{{ url_for('statistics') }}" class="btn btn-info">
+                 Voir les statistiques
+            </a>
+        </div>
+    </div>
+
+    <!-- Classement -->
+    <div class="card mb-4">
+        <div class="card-header bg-warning text-dark">
+            <h5 class="mb-0">🏆 Classement</h5>
+        </div>
+        <div class="card-body">
+            <p class="text-muted mb-3">Comparez vos performances avec les autres utilisateurs</p>
+            <a href="{{ url_for('leaderboard') }}" class="btn btn-warning">
+                Voir le classement
+            </a>
+        </div>
+    </div>
+
+    <!-- Retour -->
+    <div class="text-center mt-4">
+        <a href="{{ url_for('cours') }}" class="btn btn-secondary">
+             Retour à l'accueil
+        </a>
+    </div>
+</div>
+
+<script>
+    // Initialiser le thème sélectionné au chargement
+    document.addEventListener('DOMContentLoaded', function() {
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        document.getElementById('theme-' + currentTheme).checked = true;
+    });
+</script>
+{% endblock %}

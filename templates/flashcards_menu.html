@@ -1,25 +1,415 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container text-center" style="max-width: 600px;">
-    <h1 class="mb-4 mt-2">Mes Decks de Révision 🗂️</h1>
-    
-    <p class="text-muted mb-4">Choisis un sujet pour commencer à réviser :</p>
+<div class="container" style="max-width: 800px;" x-data="flashcardsManager()">
+    <h1 class="mb-4 mt-2 text-center">Mes flashcards</h1>
 
-    <div class="list-group shadow-sm">
-        {% if decks|length == 0 %}
-            <div class="alert alert-warning">
-                Aucun fichier .csv trouvé dans le dossier <code>flashcards_data</code> !
+    <!-- Boutons pour créer un nouveau dossier et des flashcards -->
+    <div class="mb-3 text-end d-flex gap-2 justify-content-end">
+        <button class="btn btn-sm btn-success" onclick="ouvrirModalCreerFlashcard()">
+            ✨ Créer des flashcards
+        </button>
+        <button class="btn btn-sm btn-outline-primary" @click="createFolder(null)">
+            Nouveau dossier
+        </button>
+    </div>
+
+    <!-- Arborescence des dossiers et decks -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            {% if folder_tree|length == 0 and root_decks|length == 0 %}
+                <div class="alert alert-warning">
+                    Aucun deck de flashcards disponible. Générez-en depuis vos cours PDF !
+                </div>
+            {% else %}
+                <!-- Decks à la racine -->
+                {% for deck in root_decks %}
+                    <div class="list-item deck-item d-flex justify-content-between align-items-center p-2 border-bottom">
+                        <div class="d-flex align-items-center flex-grow-1">
+                            <a href="{{ url_for('flashcards_play', deck=deck.name) }}" class="text-decoration-none fw-bold flex-grow-1" style="color: var(--text-primary);">
+                                {{ deck.name }}
+                            </a>
+                        </div>
+                        <div class="d-flex gap-2 align-items-center">
+                            <span class="badge bg-primary" title="Nouvelles">{{ deck.stats.new }}</span>
+                            <span class="badge bg-warning" title="À réapprendre">{{ deck.stats.relearn }}</span>
+                            <span class="badge bg-success" title="À réviser">{{ deck.stats.review }}</span>
+                            <button class="btn btn-sm btn-outline-secondary" @click="moveDeck({{ deck.id }}, '{{ deck.name }}')">
+                                Déplacer
+                            </button>
+                        </div>
+                    </div>
+                {% endfor %}
+
+                <!-- Arborescence des dossiers -->
+                {% for folder in folder_tree %}
+                    {{ render_folder(folder) }}
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Statistiques globales -->
+    {% if folder_tree|length > 0 or root_decks|length > 0 %}
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h6 class="card-subtitle mb-3 text-muted">Statistiques globales</h6>
+            <div class="row text-center">
+                <div class="col-4">
+                    <div class="p-2">
+                        <h3 class="text-primary mb-0">{{ stats.new }}</h3>
+                        <small class="text-muted">Nouvelles</small>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="p-2">
+                        <h3 class="text-warning mb-0">{{ stats.relearn }}</h3>
+                        <small class="text-muted">À réapprendre</small>
+                    </div>
+                </div>
+                <div class="col-4">
+                    <div class="p-2">
+                        <h3 class="text-success mb-0">{{ stats.review }}</h3>
+                        <small class="text-muted">À réviser</small>
+                    </div>
+                </div>
             </div>
-        {% else %}
-            {% for deck in decks %}
-                <a href="{{ url_for('flashcards_play', deck=deck) }}" 
-                   class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3">
-                    <span class="fs-5 fw-bold text-dark">🎴 {{ deck }}</span>
-                    <span class="badge bg-primary rounded-pill">Jouer ➡️</span>
-                </a>
-            {% endfor %}
-        {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.folder-item {
+    margin-left: 0;
+    cursor: pointer;
+}
+.folder-children {
+    margin-left: 20px;
+}
+.folder-header {
+    padding: 8px;
+    border-bottom: 1px solid var(--border-color);
+}
+.folder-header:hover {
+    background-color: var(--bg-secondary);
+}
+.deck-item:hover {
+    background-color: var(--bg-secondary);
+}
+</style>
+
+<script>
+function flashcardsManager() {
+    return {
+        createFolder(parentId) {
+            const folderName = prompt('Nom du nouveau dossier:');
+            if (!folderName) return;
+
+            fetch('/api/folders/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: folderName, parent_id: parentId })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Erreur: ' + data.error);
+                }
+            });
+        },
+
+        renameFolder(folderId) {
+            const newName = prompt('Nouveau nom du dossier:');
+            if (!newName) return;
+
+            fetch(`/api/folders/${folderId}/rename`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name: newName })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                } else {
+                    alert('Erreur: ' + data.error);
+                }
+            });
+        },
+
+        deleteFolder(folderId) {
+            if (!confirm('Supprimer ce dossier et tout son contenu ?')) return;
+
+            fetch(`/api/folders/${folderId}/delete`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                }
+            });
+        },
+
+        moveDeck(deckId, deckName) {
+            const folderId = prompt(`ID du dossier de destination pour "${deckName}" (laissez vide pour racine):`);
+            if (folderId === null) return;
+
+            const targetFolderId = folderId === '' ? null : parseInt(folderId);
+
+            fetch(`/api/decks/${deckId}/move`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ folder_id: targetFolderId })
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload();
+                }
+            });
+        },
+
+        toggleFolder(event) {
+            const target = event.currentTarget;
+            const children = target.nextElementSibling;
+            if (children && children.classList.contains('folder-children')) {
+                children.style.display = children.style.display === 'none' ? 'block' : 'none';
+                const arrow = target.querySelector('.folder-arrow');
+                if (arrow) {
+                    arrow.textContent = children.style.display === 'none' ? '▶' : '▼';
+                }
+            }
+        }
+    };
+}
+
+// Fonctions pour la création manuelle de flashcards
+function ouvrirModalCreerFlashcard() {
+    const modal = new bootstrap.Modal(document.getElementById('modalCreerFlashcard'));
+    modal.show();
+}
+
+async function creerFlashcards() {
+    const nomDeck = document.getElementById('newDeckName').value.trim();
+    const question = document.getElementById('newQuestion').value.trim();
+    const reponse = document.getElementById('newAnswer').value.trim();
+    const bidirectional = document.getElementById('bidirectional').checked;
+    const imageFile = document.getElementById('imageUpload').files[0];
+
+    if (!nomDeck || !question || !reponse) {
+        alert('Veuillez remplir tous les champs requis');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('nom_deck', nomDeck);
+    formData.append('question', question);
+    formData.append('reponse', reponse);
+    formData.append('bidirectional', bidirectional);
+
+    if (imageFile) {
+        formData.append('image', imageFile);
+    }
+
+    try {
+        const response = await fetch('/api/creer-flashcard-manuelle', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            alert('Flashcard(s) créée(s) avec succès!');
+            location.reload();
+        } else {
+            alert('Erreur: ' + data.error);
+        }
+    } catch (error) {
+        alert('Erreur réseau: ' + error.message);
+    }
+}
+
+// Fonctions pour le formatage du texte
+function insertFormatting(field, format) {
+    const textarea = document.getElementById(field);
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = textarea.value.substring(start, end);
+
+    let formattedText = '';
+    switch(format) {
+        case 'bold':
+            formattedText = `**${selectedText}**`;
+            break;
+        case 'italic':
+            formattedText = `*${selectedText}*`;
+            break;
+        case 'underline':
+            formattedText = `<u>${selectedText}</u>`;
+            break;
+        case 'latex':
+            formattedText = `$${selectedText}$`;
+            break;
+    }
+
+    textarea.value = textarea.value.substring(0, start) + formattedText + textarea.value.substring(end);
+    textarea.focus();
+    textarea.selectionStart = start + formattedText.length;
+    textarea.selectionEnd = start + formattedText.length;
+}
+</script>
+
+<!-- Modal pour créer des flashcards manuellement -->
+<div class="modal fade" id="modalCreerFlashcard" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">✨ Créer des flashcards manuellement</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formCreerFlashcard">
+                    <div class="mb-3">
+                        <label for="newDeckName" class="form-label fw-bold">Nom du deck</label>
+                        <input type="text" class="form-control" id="newDeckName"
+                               placeholder="Ex: vocabulaire_anglais" required>
+                        <small class="text-muted">Créera un nouveau deck ou ajoutera à un deck existant</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="newQuestion" class="form-label fw-bold">Question / Recto</label>
+                        <div class="btn-group mb-2" role="group">
+                            <button type="button" class="btn btn-sm btn-outline-secondary"
+                                    onclick="insertFormatting('newQuestion', 'bold')" title="Gras">
+                                <strong>B</strong>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary"
+                                    onclick="insertFormatting('newQuestion', 'italic')" title="Italique">
+                                <em>I</em>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary"
+                                    onclick="insertFormatting('newQuestion', 'underline')" title="Souligné">
+                                <u>U</u>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary"
+                                    onclick="insertFormatting('newQuestion', 'latex')" title="LaTeX">
+                                $x^2$
+                            </button>
+                        </div>
+                        <textarea class="form-control font-monospace" id="newQuestion" rows="3"
+                                  placeholder="Entrez votre question..." required></textarea>
+                        <small class="text-muted">
+                            Formatage: **gras**, *italique*, <code>&lt;u&gt;souligné&lt;/u&gt;</code>,
+                            LaTeX: <code>$formule$</code>
+                        </small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="newAnswer" class="form-label fw-bold">Réponse / Verso</label>
+                        <div class="btn-group mb-2" role="group">
+                            <button type="button" class="btn btn-sm btn-outline-secondary"
+                                    onclick="insertFormatting('newAnswer', 'bold')" title="Gras">
+                                <strong>B</strong>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary"
+                                    onclick="insertFormatting('newAnswer', 'italic')" title="Italique">
+                                <em>I</em>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary"
+                                    onclick="insertFormatting('newAnswer', 'underline')" title="Souligné">
+                                <u>U</u>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary"
+                                    onclick="insertFormatting('newAnswer', 'latex')" title="LaTeX">
+                                $x^2$
+                            </button>
+                        </div>
+                        <textarea class="form-control font-monospace" id="newAnswer" rows="3"
+                                  placeholder="Entrez votre réponse..." required></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="imageUpload" class="form-label fw-bold">Image (optionnel)</label>
+                        <input type="file" class="form-control" id="imageUpload" accept="image/*">
+                        <small class="text-muted">L'image sera affichée sur la carte</small>
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="bidirectional">
+                        <label class="form-check-label" for="bidirectional">
+                            <strong>Créer aussi la carte inverse</strong>
+                            <small class="d-block text-muted">
+                                Crée automatiquement une deuxième carte avec question/réponse inversées
+                            </small>
+                        </label>
+                    </div>
+
+                    <div class="alert alert-info mb-0">
+                        <small>
+                            <strong>💡 Astuce:</strong> Vous pouvez utiliser du LaTeX pour les formules mathématiques.
+                            Exemple: <code>$\\frac{1}{2}$</code> affichera ½
+                        </small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-success" onclick="creerFlashcards()">
+                    Créer
+                </button>
+            </div>
+        </div>
     </div>
 </div>
+
 {% endblock %}
+
+{% macro render_folder(folder) %}
+<div class="folder-item">
+    <div class="folder-header d-flex justify-content-between align-items-center" @click="toggleFolder">
+        <div class="d-flex align-items-center flex-grow-1">
+            <span class="folder-arrow me-2">▼</span>
+            <strong>{{ folder.name }}</strong>
+        </div>
+        <div class="d-flex gap-2 align-items-center">
+            <span class="badge bg-primary" title="Nouvelles">{{ folder.stats.new }}</span>
+            <span class="badge bg-warning" title="À réapprendre">{{ folder.stats.relearn }}</span>
+            <span class="badge bg-success" title="À réviser">{{ folder.stats.review }}</span>
+            <button class="btn btn-sm btn-outline-primary" @click.stop="createFolder({{ folder.id }})">+</button>
+            <button class="btn btn-sm btn-outline-secondary" @click.stop="renameFolder({{ folder.id }})">✎</button>
+            <button class="btn btn-sm btn-outline-danger" @click.stop="deleteFolder({{ folder.id }})">×</button>
+        </div>
+    </div>
+    <div class="folder-children">
+        <!-- Decks dans ce dossier -->
+        {% for deck in folder.decks %}
+            <div class="list-item deck-item d-flex justify-content-between align-items-center p-2 border-bottom">
+                <div class="d-flex align-items-center flex-grow-1">
+                    <a href="{{ url_for('flashcards_play', deck=deck.name) }}" class="text-decoration-none fw-bold flex-grow-1" style="color: var(--text-primary);">
+                        {{ deck.name }}
+                    </a>
+                </div>
+                <div class="d-flex gap-2 align-items-center">
+                    <span class="badge bg-primary" title="Nouvelles">{{ deck.stats.new }}</span>
+                    <span class="badge bg-warning" title="À réapprendre">{{ deck.stats.relearn }}</span>
+                    <span class="badge bg-success" title="À réviser">{{ deck.stats.review }}</span>
+                    <button class="btn btn-sm btn-outline-secondary" @click="moveDeck({{ deck.id }}, '{{ deck.name }}')">
+                        Déplacer
+                    </button>
+                </div>
+            </div>
+        {% endfor %}
+
+        <!-- Sous-dossiers -->
+        {% for child in folder.children %}
+            {{ render_folder(child) }}
+        {% endfor %}
+    </div>
+</div>
+{% endmacro %}

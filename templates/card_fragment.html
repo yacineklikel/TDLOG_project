@@ -1,3 +1,4 @@
+{% if carte %}
 <div class="d-flex flex-column align-items-center" x-data="{ retournee: false }">
 
     <div class="scene mb-4" style="cursor: pointer;" @click="retournee = !retournee">
@@ -21,7 +22,7 @@
 
     <!-- Boutons de révision : Recommencer, Difficile, Bon, Facile -->
     <div class="d-flex flex-wrap gap-2 justify-content-center" x-show="retournee" x-transition style="display: none;">
-        
+
         <!-- Again (0) - Rouge -->
         <button class="btn btn-danger btn-sm px-3"
                 hx-get="{{ url_for('vote_card', rating=0, flashcard_id=carte.id, deck=current_deck) }}"
@@ -63,9 +64,25 @@
         </button>
 
     </div>
-    
+
     <p class="text-muted mt-3 small" x-show="!retournee">👆 Clique pour retourner et choisir ta réponse</p>
     <p class="text-muted mt-2 small" x-show="retournee" style="display: none;">
         <strong>Astuce:</strong> Choisis selon ta maîtrise (0b0e adaptera l'intervalle)
     </p>
 </div>
+{% else %}
+<!-- Message quand il n'y a plus de cartes -->
+<div class="d-flex flex-column align-items-center justify-content-center" style="min-height: 400px;">
+    <div class="text-center">
+        <div style="font-size: 5rem; margin-bottom: 1rem;">🎉</div>
+        <h2 class="mb-3" style="color: var(--text-primary);">Félicitations !</h2>
+        <p class="lead mb-4" style="color: var(--text-secondary);">
+            Vous avez terminé ce deck.<br>
+            À demain !
+        </p>
+        <a href="{{ url_for('flashcards_menu') }}" class="btn btn-primary btn-lg">
+             Retour aux decks
+        </a>
+    </div>
+</div>
+{% endif %}

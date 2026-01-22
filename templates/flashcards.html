@@ -82,16 +82,7 @@
     </div>
 
     <div id="zone-carte">
-        {% if carte %}
-            {% include 'card_fragment.html' %}
-        {% else %}
-            <div class="alert alert-danger shadow-sm">
-                <h4 class="alert-heading">Oups ! 😕</h4>
-                <p>Impossible de lire le fichier <b>{{ current_deck }}</b>.</p>
-                <hr>
-                <p class="mb-0 fs-6">Vérifie qu'il contient bien des données séparées par des virgules.</p>
-            </div>
-        {% endif %}
+        {% include 'card_fragment.html' %}
     </div>
 </div>
 

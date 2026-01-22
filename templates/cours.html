@@ -183,6 +183,24 @@
                         </div>
 
                         <div class="mb-3">
+                            <label class="form-label fw-bold">
+                                Sélection de pages (optionnel)
+                                <span class="badge bg-secondary">Nouveau</span>
+                            </label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <input type="number" class="form-control" id="pageDebut" name="pageDebut"
+                                           placeholder="Page de début" min="1">
+                                </div>
+                                <div class="col-md-6">
+                                    <input type="number" class="form-control" id="pageFin" name="pageFin"
+                                           placeholder="Page de fin" min="1">
+                                </div>
+                            </div>
+                            <small class="text-muted">Laissez vide pour utiliser tout le document</small>
+                        </div>
+
+                        <div class="mb-3">
                             <label for="ephemeralPrompt" class="form-label fw-bold">
                                 Prompt éphémère (optionnel)
                                 <span class="badge bg-info">Avancé</span>
@@ -277,9 +295,22 @@
             const nomDeck = document.getElementById('nomDeck').value.trim();
             const nbFlashcards = document.getElementById('nbFlashcards').value;
             const ephemeralPrompt = document.getElementById('ephemeralPrompt').value.trim();
+            const pageDebut = document.getElementById('pageDebut').value.trim();
+            const pageFin = document.getElementById('pageFin').value.trim();
 
             if (!nomDeck) {
                 afficherMessage('Veuillez remplir le nom du deck', 'warning');
+                return;
+            }
+
+            // Validation des pages
+            if ((pageDebut && !pageFin) || (!pageDebut && pageFin)) {
+                afficherMessage('Veuillez remplir les deux champs de sélection de pages ou aucun', 'warning');
+                return;
+            }
+
+            if (pageDebut && pageFin && parseInt(pageDebut) > parseInt(pageFin)) {
+                afficherMessage('La page de début doit être inférieure ou égale à la page de fin', 'warning');
                 return;
             }
 
@@ -296,6 +327,12 @@
                     nb_flashcards: parseInt(nbFlashcards),
                     nom_deck: nomDeck
                 };
+
+                // Ajouter la sélection de pages si fournie
+                if (pageDebut && pageFin) {
+                    requestData.page_debut = parseInt(pageDebut);
+                    requestData.page_fin = parseInt(pageFin);
+                }
 
                 // Ajouter le prompt éphémère s'il est fourni
                 if (ephemeralPrompt) {

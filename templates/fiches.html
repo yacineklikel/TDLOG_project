@@ -4,11 +4,86 @@
 <div class="container" style="max-width: 800px;">
     <h1 class="text-center mb-4 mt-2">Mes fiches résumé</h1>
 
-    <p class="text-center text-muted mb-4">
-        Vos fiches résumé générées à partir de vos cours PDF
-    </p>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <p class="text-muted mb-0">
+            Vos fiches résumé générées à partir de vos cours PDF
+        </p>
+        <button class="btn btn-sm btn-success" onclick="ouvrirModalCreerFiche()">
+            ✨ Créer une fiche manuellement
+        </button>
+    </div>
 
-    <!-- Liste des fiches -->
+    <!-- Alert pour les messages -->
+    <div id="alertContainer"></div>
+
+    <!-- Documents Officiels -->
+    {% if originaux|length > 0 %}
+    <div class="card mb-4 shadow-sm" style="border-color: var(--compartment-border);">
+        <div class="card-header d-flex justify-content-between align-items-center" style="background-color: var(--compartment-bg); color: var(--text-primary); border-color: var(--compartment-border);">
+            <span>Documents Officiels</span>
+            <span class="badge" style="background-color: var(--card-bg); color: var(--text-primary);">{{ originaux|length }}</span>
+        </div>
+        <div class="list-group list-group-flush">
+            {% for fichier in originaux %}
+                <a href="{{ url_for('static', filename='pdfs/fiches/originaux/' + fichier) }}"
+                   class="list-group-item list-group-item-action"
+                   target="_blank">
+                    <div class="d-flex align-items-center">
+                        <span class="fw-bold">{{ fichier }}</span>
+                    </div>
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Formulaire d'upload -->
+    <div class="card p-3 mb-4 bg-light border shadow-sm">
+        <h6 class="card-subtitle mb-2 text-muted fw-bold">Ajouter un document PDF</h6>
+        <form method="POST" enctype="multipart/form-data" class="d-flex gap-2">
+            <input type="file" name="fichier_pdf" class="form-control" accept=".pdf" required>
+            <button type="submit" class="btn btn-success">
+                Envoyer
+            </button>
+        </form>
+    </div>
+
+    <!-- PDFs uploadés -->
+    {% if uploads|length > 0 %}
+    <div class="card shadow-sm mb-4" style="border-color: var(--compartment-border);">
+        <div class="card-header d-flex justify-content-between align-items-center" style="background-color: var(--compartment-bg); color: var(--text-primary); border-color: var(--compartment-border);">
+            <span>Vos Téléchargements</span>
+            <span class="badge" style="background-color: var(--card-bg); color: var(--text-primary);">{{ uploads|length }}</span>
+        </div>
+        <div class="list-group list-group-flush">
+            {% for fichier in uploads %}
+                <div class="list-group-item">
+                    <div class="d-flex align-items-center justify-content-between w-100 gap-3">
+                        <div style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ fichier }}">
+                            {{ fichier }}
+                        </div>
+                        <div class="d-flex gap-2">
+                            <a href="{{ url_for('static', filename='pdfs/fiches/uploads/' + fichier) }}"
+                               class="btn btn-sm btn-outline-success" target="_blank">
+                                Ouvrir
+                            </a>
+                            <button class="btn btn-sm btn-info"
+                                    onclick="ouvrirModalFiche('{{ fichier }}', 'fiches', 'uploads')">
+                                Générer fiche
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger"
+                                    onclick="supprimerPdf('{{ fichier }}', 'fiches')">
+                                Supprimer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Liste des fiches générées -->
     <div class="card shadow-sm">
         <div class="card-header d-flex justify-content-between align-items-center" style="background-color: var(--compartment-bg); color: var(--text-primary); border-color: var(--compartment-border);">
             <span>Fiches générées</span>
@@ -60,7 +135,358 @@
     </div>
 </div>
 
+<!-- Modal pour créer une fiche manuellement -->
+<div class="modal fade" id="modalCreerFicheManuelle" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">✨ Créer une fiche de révision manuellement</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formCreerFicheManuelle">
+                    <div class="mb-3">
+                        <label for="manualFicheNom" class="form-label fw-bold">Nom de la fiche</label>
+                        <input type="text" class="form-control" id="manualFicheNom"
+                               placeholder="Ex: resume_algebre_lineaire" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="manualFicheContenu" class="form-label fw-bold">Contenu (Markdown)</label>
+                        <div class="btn-group mb-2" role="group">
+                            <button type="button" class="btn btn-sm btn-outline-secondary"
+                                    onclick="insertFicheFormatting('bold')" title="Gras">
+                                <strong>B</strong>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary"
+                                    onclick="insertFicheFormatting('italic')" title="Italique">
+                                <em>I</em>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary"
+                                    onclick="insertFicheFormatting('underline')" title="Souligné">
+                                <u>U</u>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary"
+                                    onclick="insertFicheFormatting('latex')" title="LaTeX">
+                                $x^2$
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary"
+                                    onclick="insertFicheFormatting('heading')" title="Titre">
+                                H1
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary"
+                                    onclick="insertFicheFormatting('list')" title="Liste">
+                                •
+                            </button>
+                        </div>
+                        <textarea class="form-control font-monospace" id="manualFicheContenu" rows="15"
+                                  placeholder="# Titre de la fiche
+
+## Section 1
+
+**Définition importante**: texte en gras
+
+*texte en italique*
+
+Formule mathématique: $\\frac{a}{b}$
+
+## Section 2
+
+- Point 1
+- Point 2
+
+" required></textarea>
+                        <small class="text-muted">
+                            Formatage Markdown: <code># Titre</code>, <code>## Sous-titre</code>,
+                            <code>**gras**</code>, <code>*italique*</code>, <code>$formule$</code>
+                        </small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="ficheImageUpload" class="form-label fw-bold">Image (optionnel)</label>
+                        <input type="file" class="form-control" id="ficheImageUpload" accept="image/*">
+                        <small class="text-muted">L'image sera ajoutée au contenu de la fiche</small>
+                    </div>
+
+                    <div class="alert alert-info mb-0">
+                        <small>
+                            <strong>💡 Astuce:</strong> Utilisez le format Markdown pour structurer votre fiche.
+                            Les formules LaTeX seront rendues automatiquement.
+                        </small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-success" onclick="creerFicheManuelle()">
+                    Créer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour générer une fiche résumé -->
+<div class="modal fade" id="modalFiche" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Générer une fiche résumé</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formGenererFiche">
+                    <input type="hidden" id="fichePdfFilename" name="pdfFilename">
+                    <input type="hidden" id="ficheCategorie" name="categorie">
+                    <input type="hidden" id="ficheSource" name="source">
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Fichier PDF</label>
+                        <input type="text" class="form-control" id="ficheDisplayPdfName" disabled>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="ficheNom" class="form-label fw-bold">Nom de la fiche</label>
+                        <input type="text" class="form-control" id="ficheNom" name="ficheNom"
+                               placeholder="Ex: resume_statistiques" required>
+                        <small class="text-muted">Ce nom sera utilisé pour identifier votre fiche</small>
+                    </div>
+
+                    <div class="alert alert-info mb-0">
+                        <small>
+                            <strong>Info:</strong> La fiche résumé contiendra uniquement les définitions, propriétés et exemples importants du document.
+                        </small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-info" onclick="genererFiche()" id="btnGenererFiche">
+                    <span id="btnFicheText">Générer</span>
+                    <span id="btnFicheSpinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
+    let modalFiche;
+    let modalCreerFicheManuelle;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        modalFiche = new bootstrap.Modal(document.getElementById('modalFiche'));
+        modalCreerFicheManuelle = new bootstrap.Modal(document.getElementById('modalCreerFicheManuelle'));
+    });
+
+    function ouvrirModalCreerFiche() {
+        modalCreerFicheManuelle.show();
+    }
+
+    function insertFicheFormatting(format) {
+        const textarea = document.getElementById('manualFicheContenu');
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const selectedText = textarea.value.substring(start, end);
+
+        let formattedText = '';
+        switch(format) {
+            case 'bold':
+                formattedText = `**${selectedText}**`;
+                break;
+            case 'italic':
+                formattedText = `*${selectedText}*`;
+                break;
+            case 'underline':
+                formattedText = `<u>${selectedText}</u>`;
+                break;
+            case 'latex':
+                formattedText = `$${selectedText}$`;
+                break;
+            case 'heading':
+                formattedText = `\n## ${selectedText}\n`;
+                break;
+            case 'list':
+                formattedText = `- ${selectedText}`;
+                break;
+        }
+
+        textarea.value = textarea.value.substring(0, start) + formattedText + textarea.value.substring(end);
+        textarea.focus();
+        textarea.selectionStart = start + formattedText.length;
+        textarea.selectionEnd = start + formattedText.length;
+    }
+
+    async function creerFicheManuelle() {
+        const ficheNom = document.getElementById('manualFicheNom').value.trim();
+        const contenu = document.getElementById('manualFicheContenu').value.trim();
+        const imageFile = document.getElementById('ficheImageUpload').files[0];
+
+        if (!ficheNom || !contenu) {
+            afficherMessage('Veuillez remplir tous les champs requis', 'warning');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('fiche_nom', ficheNom);
+        formData.append('contenu', contenu);
+
+        if (imageFile) {
+            formData.append('image', imageFile);
+        }
+
+        try {
+            const response = await fetch('/api/creer-fiche-manuelle', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                afficherMessage('Fiche créée avec succès!', 'success');
+                modalCreerFicheManuelle.hide();
+                document.getElementById('formCreerFicheManuelle').reset();
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                afficherMessage('Erreur: ' + data.error, 'danger');
+            }
+        } catch (error) {
+            afficherMessage('Erreur réseau: ' + error.message, 'danger');
+        }
+    }
+
+    function ouvrirModalFiche(filename, categorie, source) {
+        document.getElementById('fichePdfFilename').value = filename;
+        document.getElementById('ficheCategorie').value = categorie;
+        document.getElementById('ficheSource').value = source;
+        document.getElementById('ficheDisplayPdfName').value = filename;
+
+        // Suggérer un nom de fiche basé sur le nom du fichier
+        const nomSuggere = 'resume_' + filename.replace('.pdf', '').toLowerCase()
+            .replace(/[^a-z0-9]/g, '_');
+        document.getElementById('ficheNom').value = nomSuggere;
+
+        modalFiche.show();
+    }
+
+    function afficherMessage(message, type) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        alertDiv.role = 'alert';
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.getElementById('alertContainer').appendChild(alertDiv);
+
+        // Auto-dismiss après 5 secondes
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 5000);
+    }
+
+    async function genererFiche() {
+        const btnGenererFiche = document.getElementById('btnGenererFiche');
+        const btnFicheText = document.getElementById('btnFicheText');
+        const btnFicheSpinner = document.getElementById('btnFicheSpinner');
+
+        // Récupération des valeurs
+        const pdfFilename = document.getElementById('fichePdfFilename').value;
+        const categorie = document.getElementById('ficheCategorie').value;
+        const source = document.getElementById('ficheSource').value;
+        const ficheNom = document.getElementById('ficheNom').value.trim();
+
+        if (!ficheNom) {
+            afficherMessage('Veuillez remplir le nom de la fiche', 'warning');
+            return;
+        }
+
+        // Désactiver le bouton et afficher le spinner
+        btnGenererFiche.disabled = true;
+        btnFicheText.classList.add('d-none');
+        btnFicheSpinner.classList.remove('d-none');
+
+        try {
+            const requestData = {
+                pdf_filename: pdfFilename,
+                categorie: categorie,
+                source: source,
+                fiche_nom: ficheNom
+            };
+
+            const response = await fetch('/api/generer-fiche', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(requestData)
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                afficherMessage(
+                    `${data.message}! Vous pouvez télécharger la fiche résumé.`,
+                    'success'
+                );
+                modalFiche.hide();
+                // Réinitialiser le formulaire
+                document.getElementById('formGenererFiche').reset();
+
+                // Recharger la page pour afficher la nouvelle fiche
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1500);
+            } else {
+                afficherMessage(`Erreur: ${data.error}`, 'danger');
+            }
+        } catch (error) {
+            afficherMessage(`Erreur réseau: ${error.message}`, 'danger');
+        } finally {
+            // Réactiver le bouton
+            btnGenererFiche.disabled = false;
+            btnFicheText.classList.remove('d-none');
+            btnFicheSpinner.classList.add('d-none');
+        }
+    }
+
+    async function supprimerPdf(filename, categorie) {
+        if (!confirm(`Êtes-vous sûr de vouloir supprimer "${filename}" ?`)) {
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/supprimer-pdf', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    filename: filename,
+                    categorie: categorie,
+                    source: 'uploads'
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success) {
+                afficherMessage(`${data.message}`, 'success');
+                // Recharger la page pour actualiser la liste
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                afficherMessage(`Erreur: ${data.error}`, 'danger');
+            }
+        } catch (error) {
+            afficherMessage(`Erreur réseau: ${error.message}`, 'danger');
+        }
+    }
+
     async function supprimerFiche(filename) {
         if (!confirm(`Êtes-vous sûr de vouloir supprimer la fiche "${filename}" ?`)) {
             return;

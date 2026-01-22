@@ -4,8 +4,11 @@
 <div class="container" style="max-width: 800px;" x-data="flashcardsManager()">
     <h1 class="mb-4 mt-2 text-center">Mes flashcards</h1>
 
-    <!-- Bouton pour créer un nouveau dossier -->
-    <div class="mb-3 text-end">
+    <!-- Boutons pour créer un nouveau dossier et des flashcards -->
+    <div class="mb-3 text-end d-flex gap-2 justify-content-end">
+        <button class="btn btn-sm btn-success" onclick="ouvrirModalCreerFlashcard()">
+            ✨ Créer des flashcards
+        </button>
         <button class="btn btn-sm btn-outline-primary" @click="createFolder(null)">
             Nouveau dossier
         </button>
@@ -184,7 +187,187 @@ function flashcardsManager() {
         }
     };
 }
+
+// Fonctions pour la création manuelle de flashcards
+function ouvrirModalCreerFlashcard() {
+    const modal = new bootstrap.Modal(document.getElementById('modalCreerFlashcard'));
+    modal.show();
+}
+
+async function creerFlashcards() {
+    const nomDeck = document.getElementById('newDeckName').value.trim();
+    const question = document.getElementById('newQuestion').value.trim();
+    const reponse = document.getElementById('newAnswer').value.trim();
+    const bidirectional = document.getElementById('bidirectional').checked;
+    const imageFile = document.getElementById('imageUpload').files[0];
+
+    if (!nomDeck || !question || !reponse) {
+        alert('Veuillez remplir tous les champs requis');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('nom_deck', nomDeck);
+    formData.append('question', question);
+    formData.append('reponse', reponse);
+    formData.append('bidirectional', bidirectional);
+
+    if (imageFile) {
+        formData.append('image', imageFile);
+    }
+
+    try {
+        const response = await fetch('/api/creer-flashcard-manuelle', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            alert('Flashcard(s) créée(s) avec succès!');
+            location.reload();
+        } else {
+            alert('Erreur: ' + data.error);
+        }
+    } catch (error) {
+        alert('Erreur réseau: ' + error.message);
+    }
+}
+
+// Fonctions pour le formatage du texte
+function insertFormatting(field, format) {
+    const textarea = document.getElementById(field);
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const selectedText = textarea.value.substring(start, end);
+
+    let formattedText = '';
+    switch(format) {
+        case 'bold':
+            formattedText = `**${selectedText}**`;
+            break;
+        case 'italic':
+            formattedText = `*${selectedText}*`;
+            break;
+        case 'underline':
+            formattedText = `<u>${selectedText}</u>`;
+            break;
+        case 'latex':
+            formattedText = `$${selectedText}$`;
+            break;
+    }
+
+    textarea.value = textarea.value.substring(0, start) + formattedText + textarea.value.substring(end);
+    textarea.focus();
+    textarea.selectionStart = start + formattedText.length;
+    textarea.selectionEnd = start + formattedText.length;
+}
 </script>
+
+<!-- Modal pour créer des flashcards manuellement -->
+<div class="modal fade" id="modalCreerFlashcard" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">✨ Créer des flashcards manuellement</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="formCreerFlashcard">
+                    <div class="mb-3">
+                        <label for="newDeckName" class="form-label fw-bold">Nom du deck</label>
+                        <input type="text" class="form-control" id="newDeckName"
+                               placeholder="Ex: vocabulaire_anglais" required>
+                        <small class="text-muted">Créera un nouveau deck ou ajoutera à un deck existant</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="newQuestion" class="form-label fw-bold">Question / Recto</label>
+                        <div class="btn-group mb-2" role="group">
+                            <button type="button" class="btn btn-sm btn-outline-secondary"
+                                    onclick="insertFormatting('newQuestion', 'bold')" title="Gras">
+                                <strong>B</strong>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary"
+                                    onclick="insertFormatting('newQuestion', 'italic')" title="Italique">
+                                <em>I</em>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary"
+                                    onclick="insertFormatting('newQuestion', 'underline')" title="Souligné">
+                                <u>U</u>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary"
+                                    onclick="insertFormatting('newQuestion', 'latex')" title="LaTeX">
+                                $x^2$
+                            </button>
+                        </div>
+                        <textarea class="form-control font-monospace" id="newQuestion" rows="3"
+                                  placeholder="Entrez votre question..." required></textarea>
+                        <small class="text-muted">
+                            Formatage: **gras**, *italique*, <code>&lt;u&gt;souligné&lt;/u&gt;</code>,
+                            LaTeX: <code>$formule$</code>
+                        </small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="newAnswer" class="form-label fw-bold">Réponse / Verso</label>
+                        <div class="btn-group mb-2" role="group">
+                            <button type="button" class="btn btn-sm btn-outline-secondary"
+                                    onclick="insertFormatting('newAnswer', 'bold')" title="Gras">
+                                <strong>B</strong>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary"
+                                    onclick="insertFormatting('newAnswer', 'italic')" title="Italique">
+                                <em>I</em>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary"
+                                    onclick="insertFormatting('newAnswer', 'underline')" title="Souligné">
+                                <u>U</u>
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-secondary"
+                                    onclick="insertFormatting('newAnswer', 'latex')" title="LaTeX">
+                                $x^2$
+                            </button>
+                        </div>
+                        <textarea class="form-control font-monospace" id="newAnswer" rows="3"
+                                  placeholder="Entrez votre réponse..." required></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="imageUpload" class="form-label fw-bold">Image (optionnel)</label>
+                        <input type="file" class="form-control" id="imageUpload" accept="image/*">
+                        <small class="text-muted">L'image sera affichée sur la carte</small>
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="bidirectional">
+                        <label class="form-check-label" for="bidirectional">
+                            <strong>Créer aussi la carte inverse</strong>
+                            <small class="d-block text-muted">
+                                Crée automatiquement une deuxième carte avec question/réponse inversées
+                            </small>
+                        </label>
+                    </div>
+
+                    <div class="alert alert-info mb-0">
+                        <small>
+                            <strong>💡 Astuce:</strong> Vous pouvez utiliser du LaTeX pour les formules mathématiques.
+                            Exemple: <code>$\\frac{1}{2}$</code> affichera ½
+                        </small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                <button type="button" class="btn btn-success" onclick="creerFlashcards()">
+                    Créer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 {% macro render_folder(folder) %}

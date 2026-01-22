@@ -7,33 +7,33 @@
     <!-- Statistiques globales -->
     <div class="row mb-4">
         <div class="col-md-3 mb-3">
-            <div class="card text-center border-primary">
+            <div class="card text-center border-primary" style="background-color: var(--card-bg); color: var(--text-primary);">
                 <div class="card-body">
-                    <h6 class="card-subtitle mb-2 text-muted">Total Decks</h6>
+                    <h6 class="card-subtitle mb-2" style="color: var(--text-primary); opacity: 0.7;">Total Decks</h6>
                     <h2 class="card-title text-primary mb-0">{{ stats.global.total_decks }}</h2>
                 </div>
             </div>
         </div>
         <div class="col-md-3 mb-3">
-            <div class="card text-center border-info">
+            <div class="card text-center border-info" style="background-color: var(--card-bg); color: var(--text-primary);">
                 <div class="card-body">
-                    <h6 class="card-subtitle mb-2 text-muted">Total Cartes</h6>
+                    <h6 class="card-subtitle mb-2" style="color: var(--text-primary); opacity: 0.7;">Total Cartes</h6>
                     <h2 class="card-title text-info mb-0">{{ stats.global.total_cards }}</h2>
                 </div>
             </div>
         </div>
         <div class="col-md-3 mb-3">
-            <div class="card text-center border-success">
+            <div class="card text-center border-success" style="background-color: var(--card-bg); color: var(--text-primary);">
                 <div class="card-body">
-                    <h6 class="card-subtitle mb-2 text-muted">Cartes Étudiées</h6>
+                    <h6 class="card-subtitle mb-2" style="color: var(--text-primary); opacity: 0.7;">Cartes Étudiées</h6>
                     <h2 class="card-title text-success mb-0">{{ stats.global.cards_studied }}</h2>
                 </div>
             </div>
         </div>
         <div class="col-md-3 mb-3">
-            <div class="card text-center border-warning">
+            <div class="card text-center border-warning" style="background-color: var(--card-bg); color: var(--text-primary);">
                 <div class="card-body">
-                    <h6 class="card-subtitle mb-2 text-muted">À Réviser</h6>
+                    <h6 class="card-subtitle mb-2" style="color: var(--text-primary); opacity: 0.7;">À Réviser</h6>
                     <h2 class="card-title text-warning mb-0">{{ stats.global.cards_due }}</h2>
                 </div>
             </div>
@@ -41,11 +41,11 @@
     </div>
 
     <!-- Calendrier annuel -->
-    <div class="card mb-4">
+    <div class="card mb-4" style="background-color: var(--card-bg); border-color: var(--compartment-border);">
         <div class="card-header bg-primary text-white">
             <h5 class="mb-0">📅 Calendrier d'activité {{ year_activity.year }}</h5>
         </div>
-        <div class="card-body">
+        <div class="card-body" style="color: var(--text-primary);">
             <div class="activity-calendar">
                 {% for month_name, weeks in year_activity.calendar %}
                 <div class="month-container">
@@ -96,7 +96,7 @@
         .month-label {
             font-size: 0.7rem;
             font-weight: bold;
-            color: var(--text-secondary);
+            color: var(--text-primary);
             margin-bottom: 2px;
         }
 
@@ -151,7 +151,7 @@
     </style>
 
     <!-- Activité du jour -->
-    <div class="card mb-4 border-success">
+    <div class="card mb-4 border-success" style="background-color: var(--card-bg);">
         <div class="card-header bg-success text-white">
             <h5 class="mb-0">📅 Aujourd'hui</h5>
         </div>
@@ -159,7 +159,7 @@
             <div class="row">
                 <div class="col-md-6">
                     <h3 class="text-success">{{ stats.today.cards_today }}</h3>
-                    <p class="text-muted mb-0">cartes révisées aujourd'hui</p>
+                    <p style="color: var(--text-primary); opacity: 0.7;" class="mb-0">cartes révisées aujourd'hui</p>
                 </div>
                 <div class="col-md-6 text-end">
                     {% if stats.global.cards_due > 0 %}
@@ -167,7 +167,7 @@
                              Continuer à réviser
                         </a>
                     {% else %}
-                        <span class="text-muted"> Aucune carte à réviser !</span>
+                        <span style="color: var(--text-primary); opacity: 0.7;"> Aucune carte à réviser !</span>
                     {% endif %}
                 </div>
             </div>
@@ -175,28 +175,28 @@
     </div>
 
     <!-- Répartition des cartes -->
-    <div class="card mb-4">
+    <div class="card mb-4" style="background-color: var(--card-bg); border-color: var(--compartment-border);">
         <div class="card-header bg-primary text-white">
             <h5 class="mb-0">🎯 Répartition des Cartes</h5>
         </div>
         <div class="card-body">
             <div class="row text-center">
                 <div class="col-md-4 mb-3">
-                    <div class="p-3 border rounded">
+                    <div class="p-3 border rounded" style="background-color: var(--bg-primary); border-color: var(--compartment-border) !important;">
                         <h4 class="text-warning mb-1">{{ stats.global.cards_learning }}</h4>
-                        <small class="text-muted">En apprentissage</small>
+                        <small style="color: var(--text-primary); opacity: 0.7;">En apprentissage</small>
                     </div>
                 </div>
                 <div class="col-md-4 mb-3">
-                    <div class="p-3 border rounded">
+                    <div class="p-3 border rounded" style="background-color: var(--bg-primary); border-color: var(--compartment-border) !important;">
                         <h4 class="text-success mb-1">{{ stats.global.cards_mature }}</h4>
-                        <small class="text-muted">Cartes matures</small>
+                        <small style="color: var(--text-primary); opacity: 0.7;">Cartes matures</small>
                     </div>
                 </div>
                 <div class="col-md-4 mb-3">
-                    <div class="p-3 border rounded">
-                        <h4 class="text-secondary mb-1">{{ stats.global.total_cards - stats.global.cards_studied }}</h4>
-                        <small class="text-muted">Jamais vues</small>
+                    <div class="p-3 border rounded" style="background-color: var(--bg-primary); border-color: var(--compartment-border) !important;">
+                        <h4 style="color: var(--text-primary);" class="mb-1">{{ stats.global.total_cards - stats.global.cards_studied }}</h4>
+                        <small style="color: var(--text-primary); opacity: 0.7;">Jamais vues</small>
                     </div>
                 </div>
             </div>
@@ -204,18 +204,18 @@
     </div>
 
     <!-- Statistiques par deck -->
-    <div class="card mb-4">
+    <div class="card mb-4" style="background-color: var(--card-bg); border-color: var(--compartment-border);">
         <div class="card-header bg-info text-white">
             <h5 class="mb-0"> Statistiques par Deck</h5>
         </div>
         <div class="card-body">
             {% if stats.decks|length == 0 %}
-                <p class="text-muted text-center my-4">Aucun deck trouvé. Générez des flashcards depuis vos cours !</p>
+                <p style="color: var(--text-primary); opacity: 0.7;" class="text-center my-4">Aucun deck trouvé. Générez des flashcards depuis vos cours !</p>
             {% else %}
                 <div class="table-responsive">
                     <table class="table table-hover">
                         <thead>
-                            <tr>
+                            <tr style="color: var(--text-primary);">
                                 <th>Deck</th>
                                 <th class="text-center">Total</th>
                                 <th class="text-center">Étudiées</th>
@@ -226,7 +226,7 @@
                         </thead>
                         <tbody>
                             {% for deck in stats.decks %}
-                            <tr>
+                            <tr style="color: var(--text-primary);">
                                 <td><strong>{{ deck.deck_name }}</strong></td>
                                 <td class="text-center">{{ deck.total }}</td>
                                 <td class="text-center">{{ deck.studied }}</td>
@@ -245,19 +245,19 @@
     </div>
 
     <!-- Activité des 30 derniers jours -->
-    <div class="card mb-4">
+    <div class="card mb-4" style="background-color: var(--card-bg); border-color: var(--compartment-border);">
         <div class="card-header bg-secondary text-white">
             <h5 class="mb-0"> Activité des 30 derniers jours</h5>
         </div>
         <div class="card-body">
             {% if stats.activity|length == 0 %}
-                <p class="text-muted text-center my-4">Aucune activité récente. Commencez à réviser pour voir vos statistiques !</p>
+                <p style="color: var(--text-primary); opacity: 0.7;" class="text-center my-4">Aucune activité récente. Commencez à réviser pour voir vos statistiques !</p>
             {% else %}
                 <div class="row">
                     {% for day in stats.activity %}
                     <div class="col-md-3 mb-2">
-                        <div class="d-flex justify-content-between align-items-center p-2 border rounded">
-                            <small class="text-muted">{{ day.date }}</small>
+                        <div class="d-flex justify-content-between align-items-center p-2 border rounded" style="background-color: var(--bg-primary); border-color: var(--compartment-border) !important;">
+                            <small style="color: var(--text-primary); opacity: 0.7;">{{ day.date }}</small>
                             <span class="badge bg-primary">{{ day.cards_reviewed }}</span>
                         </div>
                     </div>

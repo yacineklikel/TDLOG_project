@@ -51,11 +51,16 @@
         "stat.csv": {
             "Qu'est-ce que la Loi des Grands Nombres (forte) garantit pour la moyenne empirique $\\bar{X}_n$ d'une suite de variables i.i.d. ?": 1,
             "Le théorème de Gauss-Markov stipule que, sous certaines hypothèses, l'estimateur MCO (OLS) est le _____.": 1,
-            "Un estimateur $Z_n$ d'une quantité d'intérêt (QoI) est dit 'convergent' (consistent) si _____.": 1,
-            "La loi du chi-deux à $n$ degrés de liberté, notée $\\chi^2(n)$, est la loi de la somme des carrés de _____.": 1,
+            "Un estimateur $Z_n$ d'une quantité d'intérêt (QoI) est dit 'convergent' (consistent) si _____.": 2,
+            "La loi du chi-deux à $n$ degrés de liberté, notée $\\chi^2(n)$, est la loi de la somme des carrés de _____.": 0,
             "Quelle loi de probabilité modélise le temps du premier succès dans une série d'épreuves de Bernoulli indépendantes ?": 1,
             "Le test F de Fisher est utilisé pour comparer les _____ de deux populations Gaussiennes indépendantes.": 1,
-            "Dans un modèle Gaussien, quelle est la loi de la variable $(n-1)S_n^2 / \\sigma^2$ ?": 1
+            "Dans un modèle Gaussien, quelle est la loi de la variable $(n-1)S_n^2 / \\sigma^2$ ?": 1,
+            "À quoi sert un test d'ajustement du chi-deux (chi-squared goodness-of-fit test) ?": 0,
+            "Dans la méthode des moments, comment obtient-on un estimateur d'un paramètre $\\theta$ ?": 0,
+            "Quelle est la fonction de masse de la loi binomiale $\\mathcal{B}(n, p)$ ?": 1,
+            "Comment est définie la fonction de répartition empirique (empirical CDF) $\\hat{F}_n(x)$ ?": 1,
+            "Que stipule la méthode Delta (Delta Method) ?": 1
         }
     }
 }

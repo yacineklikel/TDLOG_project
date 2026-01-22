@@ -50,22 +50,25 @@ def inject_streak():
     return dict(streak=0)
 
 # --- PROMPT PAR DÉFAUT POUR LA GÉNÉRATION DE FLASHCARDS ---
-DEFAULT_PROMPT_TEMPLATE = """Tu es un assistant pédagogique. À partir du texte suivant, génère exactement {nb_flashcards} flashcards de qualité pour aider l'étudiant à mémoriser les concepts clés.
+DEFAULT_PROMPT_TEMPLATE = """Tu es un assistant pédagogique. À partir du texte suivant, génère EXACTEMENT {nb_flashcards} flashcards de qualité pour aider l'étudiant à mémoriser les concepts clés.
 
 Texte du cours:
 {texte}
 
-Règles:
-- Génère exactement {nb_flashcards} paires question/réponse
+Règles STRICTES:
+- Tu DOIS générer EXACTEMENT {nb_flashcards} paires question/réponse (ni plus, ni moins)
 - Les questions doivent être claires et précises
 - Les réponses doivent être concises mais complètes
 - Utilise la notation LaTeX entre $ pour les formules mathématiques (ex: $x^2$)
 - Format de réponse: une ligne par flashcard au format: QUESTION;;;REPONSE
 - Utilise EXACTEMENT trois points-virgules (;;;) comme séparateur
+- Couvre TOUT le contenu du texte si le nombre de flashcards le permet
 
 Exemple de format attendu:
 Qu'est-ce qu'une variable aléatoire ?;;;Une fonction qui associe à chaque issue d'une expérience aléatoire un nombre réel
-Quelle est la formule de la variance ?;;;$Var(X) = E[(X - E[H])^2] = E[X^2] - (E[X])^2$"""
+Quelle est la formule de la variance ?;;;$Var(X) = E[(X - E[X])^2] = E[X^2] - (E[X])^2$
+
+IMPORTANT: Génère EXACTEMENT {nb_flashcards} flashcards, pas moins!"""
 
 FICHE_RESUME_PROMPT_TEMPLATE = """Tu es un assistant pédagogique spécialisé en mathématiques. À partir du texte suivant, crée une fiche résumé structurée et claire.
 
@@ -107,25 +110,44 @@ def login_required(f):
 
 # --- GENERATION FLASHCARDS DEPUIS PDF ---
 
-def extraire_texte_pdf(pdf_path):
-    """Extrait le texte d'un fichier PDF"""
+def extraire_texte_pdf(pdf_path, page_range=None):
+    """Extrait le texte d'un fichier PDF
+
+    Args:
+        pdf_path: Chemin vers le fichier PDF
+        page_range: Tuple (page_debut, page_fin) pour extraire seulement certaines pages (1-indexed)
+                   Si None, extrait toutes les pages
+    """
     try:
         reader = PdfReader(pdf_path)
         texte_complet = ""
-        for page in reader.pages:
-            texte_complet += page.extract_text() + "\n"
+
+        # Déterminer les pages à extraire
+        if page_range:
+            page_debut, page_fin = page_range
+            # Convertir en 0-indexed et s'assurer que c'est dans les limites
+            page_debut = max(0, page_debut - 1)
+            page_fin = min(len(reader.pages), page_fin)
+            pages_to_extract = range(page_debut, page_fin)
+        else:
+            pages_to_extract = range(len(reader.pages))
+
+        for i in pages_to_extract:
+            texte_complet += reader.pages[i].extract_text() + "\n"
+
         return texte_complet
     except Exception as e:
         print(f"Erreur lors de l'extraction du PDF: {e}")
         return None
 
-def generer_flashcards_via_api(texte, nb_flashcards=10, prompt_template=None):
+def generer_flashcards_via_api(texte, nb_flashcards=10, prompt_template=None, existing_questions=None):
     """Génère des flashcards à partir du texte extrait en utilisant l'API configurée
 
     Args:
         texte: Le texte extrait du PDF
         nb_flashcards: Nombre de flashcards à générer
         prompt_template: Template de prompt personnalisé (optionnel)
+        existing_questions: Liste des questions déjà présentes dans le deck (optionnel)
     """
 
     print(f"🔍 Début génération de {nb_flashcards} flashcards avec {API_PROVIDER}")
@@ -134,13 +156,35 @@ def generer_flashcards_via_api(texte, nb_flashcards=10, prompt_template=None):
     if not prompt_template:
         prompt_template = DEFAULT_PROMPT_TEMPLATE
 
+    # Adapter la limite de texte selon le nombre de flashcards demandées
+    # Plus on veut de flashcards, plus on a besoin de texte
+    max_chars = min(8000 + (nb_flashcards * 50), 30000)
+
     # Formatter le prompt avec les variables
     prompt = prompt_template.format(
         nb_flashcards=nb_flashcards,
-        texte=texte[:8000]  # Limiter à 8000 caractères pour ne pas dépasser les limites API
+        texte=texte[:max_chars]
     )
 
+    # Si des questions existent déjà, ajouter une instruction pour éviter les doublons
+    if existing_questions and len(existing_questions) > 0:
+        questions_list = "\n".join([f"- {q}" for q in existing_questions[:50]])  # Limiter à 50 questions
+        prompt += f"""
+
+IMPORTANT - Questions déjà existantes dans ce deck:
+{questions_list}
+
+Tu DOIS générer des flashcards sur des sujets DIFFÉRENTS de ces questions existantes.
+Explore d'autres aspects du texte qui n'ont pas encore été couverts.
+NE PAS répéter ou paraphraser ces questions existantes!"""
+        print(f"⚠️  Ajout de {len(existing_questions)} questions existantes au prompt pour éviter les doublons")
+
     print(f"📝 Utilisation du prompt {'personnalisé' if prompt_template != DEFAULT_PROMPT_TEMPLATE else 'par défaut'}")
+    print(f"📏 Texte limité à {max_chars} caractères pour {nb_flashcards} flashcards")
+
+    # Calculer max_tokens en fonction du nombre de flashcards
+    # Environ 50 tokens par flashcard + marge de sécurité
+    max_tokens = max(2000, nb_flashcards * 60 + 500)
 
     try:
         if API_PROVIDER == 'claude':
@@ -151,11 +195,11 @@ def generer_flashcards_via_api(texte, nb_flashcards=10, prompt_template=None):
                 print("⚠️  Clé API Claude non configurée - Génération de flashcards d'exemple")
                 return generer_flashcards_exemple(nb_flashcards), None
 
-            print(f"📡 Appel API Claude ({MODELS['claude']})")
+            print(f"📡 Appel API Claude ({MODELS['claude']}) - max_tokens: {max_tokens}")
             client = Anthropic(api_key=ANTHROPIC_API_KEY)
             response = client.messages.create(
                 model=MODELS['claude'],
-                max_tokens=2000,
+                max_tokens=max_tokens,
                 messages=[{
                     "role": "user",
                     "content": prompt
@@ -171,10 +215,15 @@ def generer_flashcards_via_api(texte, nb_flashcards=10, prompt_template=None):
                 print("⚠️  Clé API Gemini non configurée - Génération de flashcards d'exemple")
                 return generer_flashcards_exemple(nb_flashcards), None
 
-            print(f"📡 Appel API Gemini ({MODELS['gemini']})")
+            print(f"📡 Appel API Gemini ({MODELS['gemini']}) - max_tokens: {max_tokens}")
             genai.configure(api_key=GOOGLE_API_KEY)
             model = genai.GenerativeModel(MODELS['gemini'])
-            response = model.generate_content(prompt)
+            response = model.generate_content(
+                prompt,
+                generation_config=genai.types.GenerationConfig(
+                    max_output_tokens=max_tokens,
+                )
+            )
             contenu = response.text
 
         elif API_PROVIDER == 'openai':
@@ -185,7 +234,7 @@ def generer_flashcards_via_api(texte, nb_flashcards=10, prompt_template=None):
                 print("⚠️  Clé API OpenAI non configurée - Génération de flashcards d'exemple")
                 return generer_flashcards_exemple(nb_flashcards), None
 
-            print(f"📡 Appel API OpenAI ({MODELS['openai']})")
+            print(f"📡 Appel API OpenAI ({MODELS['openai']}) - max_tokens: {max_tokens}")
             client = OpenAI(api_key=OPENAI_API_KEY)
             response = client.chat.completions.create(
                 model=MODELS['openai'],
@@ -194,7 +243,7 @@ def generer_flashcards_via_api(texte, nb_flashcards=10, prompt_template=None):
                     {"role": "user", "content": prompt}
                 ],
                 temperature=0.7,
-                max_tokens=2000
+                max_tokens=max_tokens
             )
             contenu = response.choices[0].message.content
         else:
@@ -496,12 +545,37 @@ def cours():
     if res == True: return redirect(url_for('cours'))
     return render_template('cours.html', originaux=res[0], uploads=res[1], page='cours')
 
-@app.route('/fiches', methods=['GET'])
+@app.route('/fiches', methods=['GET', 'POST'])
 @login_required
 def fiches():
-    """Affiche les fiches résumé générées"""
+    """Affiche les fiches résumé générées et gère l'upload de PDFs"""
     from datetime import datetime
+    from werkzeug.utils import secure_filename
 
+    # Gestion de l'upload de PDF (POST)
+    if request.method == 'POST':
+        if 'fichier_pdf' not in request.files:
+            flash('Aucun fichier sélectionné', 'danger')
+            return redirect(url_for('fiches'))
+
+        file = request.files['fichier_pdf']
+        if file.filename == '':
+            flash('Aucun fichier sélectionné', 'danger')
+            return redirect(url_for('fiches'))
+
+        if file and file.filename.endswith('.pdf'):
+            filename = secure_filename(file.filename)
+            # Sauvegarder dans le dossier uploads de fiches
+            upload_dir = os.path.join(BASE_DIR, 'static/pdfs/fiches/uploads')
+            os.makedirs(upload_dir, exist_ok=True)
+            file.save(os.path.join(upload_dir, filename))
+            flash(f'Fichier {filename} uploadé avec succès!', 'success')
+        else:
+            flash('Seuls les fichiers PDF sont acceptés', 'danger')
+
+        return redirect(url_for('fiches'))
+
+    # Affichage des fiches (GET)
     fiches_dir = os.path.join(BASE_DIR, 'static/fiches')
     fiches_list = []
 
@@ -526,7 +600,23 @@ def fiches():
     # Trier par date de création (plus récent en premier)
     fiches_list.sort(key=lambda x: x['date'], reverse=True)
 
-    return render_template('fiches.html', fiches=fiches_list, page='fiches')
+    # Lister les PDFs uploadés dans le dossier fiches
+    pdfs_uploads = []
+    uploads_dir = os.path.join(BASE_DIR, 'static/pdfs/fiches/uploads')
+    if os.path.exists(uploads_dir):
+        pdfs_uploads = [f for f in os.listdir(uploads_dir) if f.endswith('.pdf')]
+
+    # Lister les PDFs officiels dans le dossier fiches
+    pdfs_originaux = []
+    originaux_dir = os.path.join(BASE_DIR, 'static/pdfs/fiches/originaux')
+    if os.path.exists(originaux_dir):
+        pdfs_originaux = [f for f in os.listdir(originaux_dir) if f.endswith('.pdf')]
+
+    return render_template('fiches.html',
+                          fiches=fiches_list,
+                          uploads=pdfs_uploads,
+                          originaux=pdfs_originaux,
+                          page='fiches')
 
 # --- ROUTES FLASHCARDS ---
 
@@ -732,10 +822,16 @@ def generer_flashcards_from_pdf():
         nom_deck = data.get('nom_deck')
         ephemeral_prompt = data.get('ephemeral_prompt', '').strip()
 
+        # Nouveaux paramètres pour la sélection de pages
+        page_debut = data.get('page_debut')
+        page_fin = data.get('page_fin')
+
         print(f"📄 PDF: {pdf_filename}")
         print(f"📁 Catégorie: {categorie}, Source: {source}")
         print(f"🎴 Nombre demandé: {nb_flashcards}")
         print(f"📦 Nom du deck: {nom_deck}")
+        if page_debut and page_fin:
+            print(f"📃 Pages sélectionnées: {page_debut} à {page_fin}")
         if ephemeral_prompt:
             print(f"✨ Prompt éphémère fourni ({len(ephemeral_prompt)} caractères)")
 
@@ -758,8 +854,18 @@ def generer_flashcards_from_pdf():
             }), 404
 
         print("✅ PDF trouvé, extraction du texte...")
-        # Extraction du texte
-        texte = extraire_texte_pdf(pdf_path)
+        # Extraction du texte avec sélection de pages optionnelle
+        page_range = None
+        if page_debut and page_fin:
+            try:
+                page_range = (int(page_debut), int(page_fin))
+            except ValueError:
+                return jsonify({
+                    'success': False,
+                    'error': 'Les numéros de page doivent être des entiers valides'
+                }), 400
+
+        texte = extraire_texte_pdf(pdf_path, page_range)
         if not texte:
             print("❌ Impossible d'extraire le texte")
             return jsonify({
@@ -768,6 +874,15 @@ def generer_flashcards_from_pdf():
             }), 500
 
         print(f"✅ Texte extrait ({len(texte)} caractères)")
+
+        # Vérifier si le deck existe déjà et récupérer les questions existantes
+        existing_questions = []
+        existing_deck = get_deck_by_name(nom_deck)
+        if existing_deck and existing_deck['user_id'] == user_id:
+            print(f"📚 Deck existant détecté - récupération des questions pour éviter les doublons")
+            existing_cards = get_flashcards_by_deck(existing_deck['id'])
+            existing_questions = [card['question'] for card in existing_cards]
+            print(f"📝 {len(existing_questions)} questions existantes dans le deck")
 
         # Déterminer le prompt à utiliser (priorité: éphémère > personnalisé > défaut)
         prompt_template = None
@@ -785,7 +900,7 @@ def generer_flashcards_from_pdf():
         print(f"🤖 Génération des flashcards avec {API_PROVIDER}...")
 
         # Génération des flashcards
-        flashcards, error = generer_flashcards_via_api(texte, nb_flashcards, prompt_template)
+        flashcards, error = generer_flashcards_via_api(texte, nb_flashcards, prompt_template, existing_questions)
         if error:
             print(f"❌ Erreur de génération: {error}")
             return jsonify({
@@ -903,6 +1018,7 @@ def statistics():
         month_cal = calendar.monthcalendar(year, month)
 
         weeks_data = []
+        today = date.today()
         for week in month_cal:
             week_data = []
             for day_num in week:
@@ -910,6 +1026,12 @@ def statistics():
                     week_data.append(None)
                 else:
                     day_date = date(year, month, day_num)
+
+                    # Ne pas afficher les jours futurs
+                    if day_date > today:
+                        week_data.append(None)
+                        continue
+
                     day_str = day_date.strftime('%Y-%m-%d')
 
                     # Récupérer l'activité du jour
@@ -1008,6 +1130,145 @@ def toggle_leaderboard_visibility_route():
         flash('Vous avez été retiré du classement.', 'info')
 
     return redirect(url_for('leaderboard'))
+
+
+@app.route('/api/creer-flashcard-manuelle', methods=['POST'])
+@login_required
+def creer_flashcard_manuelle():
+    """Endpoint API pour créer des flashcards manuellement"""
+    try:
+        user_id = session.get('user_id')
+
+        # Récupérer les données du formulaire
+        nom_deck = request.form.get('nom_deck', '').strip()
+        question = request.form.get('question', '').strip()
+        reponse = request.form.get('reponse', '').strip()
+        bidirectional = request.form.get('bidirectional') == 'true'
+
+        if not nom_deck or not question or not reponse:
+            return jsonify({
+                'success': False,
+                'error': 'Tous les champs requis doivent être remplis'
+            }), 400
+
+        # Gérer l'upload d'image
+        image_filename = None
+        if 'image' in request.files:
+            file = request.files['image']
+            if file and file.filename:
+                from werkzeug.utils import secure_filename
+                import uuid
+
+                # Générer un nom de fichier unique
+                ext = os.path.splitext(file.filename)[1]
+                image_filename = f"{uuid.uuid4()}{ext}"
+
+                # Créer le dossier pour les images de flashcards
+                upload_dir = os.path.join(BASE_DIR, 'static/images/flashcards')
+                os.makedirs(upload_dir, exist_ok=True)
+
+                # Sauvegarder l'image
+                file.save(os.path.join(upload_dir, image_filename))
+
+                # Ajouter l'image au markdown de la question
+                question = f"{question}\n\n![Image](/static/images/flashcards/{image_filename})"
+
+        # Créer ou récupérer le deck
+        deck_id = create_deck(nom_deck, user_id)
+
+        # Créer la flashcard principale
+        create_flashcard(deck_id, question, reponse)
+        cards_created = 1
+
+        # Si bidirectionnel, créer aussi la carte inverse
+        if bidirectional:
+            create_flashcard(deck_id, reponse, question)
+            cards_created = 2
+
+        return jsonify({
+            'success': True,
+            'message': f'{cards_created} flashcard(s) créée(s) avec succès',
+            'deck_name': nom_deck
+        })
+
+    except Exception as e:
+        print(f"Erreur lors de la création de flashcard: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'error': f'Erreur serveur: {str(e)}'
+        }), 500
+
+
+@app.route('/api/creer-fiche-manuelle', methods=['POST'])
+@login_required
+def creer_fiche_manuelle():
+    """Endpoint API pour créer une fiche de révision manuellement"""
+    try:
+        user_id = session.get('user_id')
+
+        # Récupérer les données du formulaire
+        fiche_nom = request.form.get('fiche_nom', '').strip()
+        contenu = request.form.get('contenu', '').strip()
+
+        if not fiche_nom or not contenu:
+            return jsonify({
+                'success': False,
+                'error': 'Tous les champs requis doivent être remplis'
+            }), 400
+
+        # Gérer l'upload d'image
+        if 'image' in request.files:
+            file = request.files['image']
+            if file and file.filename:
+                from werkzeug.utils import secure_filename
+                import uuid
+
+                # Générer un nom de fichier unique
+                ext = os.path.splitext(file.filename)[1]
+                image_filename = f"{uuid.uuid4()}{ext}"
+
+                # Créer le dossier pour les images de fiches
+                upload_dir = os.path.join(BASE_DIR, 'static/images/fiches')
+                os.makedirs(upload_dir, exist_ok=True)
+
+                # Sauvegarder l'image
+                file.save(os.path.join(upload_dir, image_filename))
+
+                # Ajouter l'image au contenu markdown
+                contenu = f"{contenu}\n\n![Image](/static/images/fiches/{image_filename})"
+
+        # Créer le fichier de la fiche
+        fiches_dir = os.path.join(BASE_DIR, 'static/fiches')
+        os.makedirs(fiches_dir, exist_ok=True)
+
+        # Sanitize le nom du fichier
+        from werkzeug.utils import secure_filename
+        filename = secure_filename(fiche_nom)
+        if not filename.endswith('.md'):
+            filename += '.md'
+
+        filepath = os.path.join(fiches_dir, filename)
+
+        # Écrire le contenu dans le fichier
+        with open(filepath, 'w', encoding='utf-8') as f:
+            f.write(contenu)
+
+        return jsonify({
+            'success': True,
+            'message': 'Fiche créée avec succès',
+            'filename': filename
+        })
+
+    except Exception as e:
+        print(f"Erreur lors de la création de fiche: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            'success': False,
+            'error': f'Erreur serveur: {str(e)}'
+        }), 500
 
 
 @app.route('/api/supprimer-fiche', methods=['POST'])

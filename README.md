@@ -21,7 +21,7 @@ pip install -r requirements.txt
 python app.py
 ```
 
-L'application sera accessible sur `http://localhost:5000`
+L'application sera accessible sur `http://localhost:5001`
 
 ## Nouvelle fonctionnalité: Génération de flashcards depuis PDF
 

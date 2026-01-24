@@ -9,6 +9,8 @@ import random
 from werkzeug.security import generate_password_hash
 import os
 import shutil
+from database import init_database  
+
 
 # Configuration du compte test
 TEST_USERNAME = "test_user"
@@ -365,10 +367,11 @@ def main():
     """Point d'entrée principal"""
     db_path = 'flashcards.db'
 
-    if not os.path.exists(db_path):
-        print(f"❌ Erreur: La base de données '{db_path}' n'existe pas!")
-        print(f"   Assurez-vous d'exécuter ce script dans le dossier contenant flashcards.db")
-        return
+if not os.path.exists(DB_NAME):
+    print(f"⚠️ Base de données '{DB_NAME}' introuvable.")
+    print("🔨 Création automatique de la base de données...")
+    init_database()
+    print("✅ Base de données initialisée.")
 
     # Créer une sauvegarde
     backup_path = f"flashcards_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.db"

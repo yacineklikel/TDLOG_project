@@ -83,6 +83,15 @@ def init_database():
                 user_id INTEGER NOT NULL,
                 flashcard_id INTEGER NOT NULL,
                 score INTEGER DEFAULT 0,
+                
+                -- Colonnes pour l'algorithme Anki (SRS)
+                ease_factor REAL DEFAULT 2.5,
+                interval INTEGER DEFAULT 0,
+                due_date TEXT,
+                step INTEGER DEFAULT 0,
+                is_learning INTEGER DEFAULT 0,
+                repetitions INTEGER DEFAULT 0,
+                
                 last_reviewed TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
                 FOREIGN KEY (flashcard_id) REFERENCES flashcards(id) ON DELETE CASCADE,

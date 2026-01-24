@@ -367,8 +367,8 @@ def main():
     """Point d'entrée principal"""
     db_path = 'flashcards.db'
 
-if not os.path.exists(DB_NAME):
-    print(f"⚠️ Base de données '{DB_NAME}' introuvable.")
+if not os.path.exists("flashcards.db"):
+    print(f"⚠️ Base de données 'flashcards.db' introuvable.")
     print("🔨 Création automatique de la base de données...")
     init_database()
     print("✅ Base de données initialisée.")
@@ -376,10 +376,10 @@ if not os.path.exists(DB_NAME):
     # Créer une sauvegarde
     backup_path = f"flashcards_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.db"
     print(f"💾 Création d'une sauvegarde: {backup_path}")
-    shutil.copy2(db_path, backup_path)
+    shutil.copy2("flashcards.db", backup_path)
 
     # Connexion à la base de données
-    conn = sqlite3.connect(db_path)
+    conn = sqlite3.connect("flashcards.db")
     conn.execute('PRAGMA foreign_keys = ON')
 
     try:

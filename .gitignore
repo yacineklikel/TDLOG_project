@@ -16,3 +16,5 @@ json_backup/
 .coverage
 htmlcov/
 flashcards.db.backup_*
+
+venv

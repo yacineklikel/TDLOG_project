@@ -21,23 +21,23 @@ Au lieu d'un simple score de 0 à 5, Anki utilise :
 
 ## Les 4 boutons de réponse
 
-### ❌ **Recommencer** (Again - Rating 0)
+### **Recommencer** (Again - Rating 0)
 - **Nouvelle carte** : Redémarre à l'étape 1 (1 minute)
 - **Carte en révision** : Retour en apprentissage, réduction du ease factor
 - **Utiliser quand** : Vous ne vous souvenez pas du tout
 
-### 😓 **Difficile** (Hard - Rating 1)
+### **Difficile** (Hard - Rating 1)
 - **Nouvelle carte** : Répète l'étape actuelle
 - **Carte en révision** : Intervalle légèrement réduit (×1.2), ease -0.15
 - **Utiliser quand** : Vous vous souvenez mais avec difficulté
 
-### ✅ **Bon** (Good - Rating 2)
+### **Bon** (Good - Rating 2)
 - **Nouvelle carte** : Passe à l'étape suivante
 - **Carte en révision** : Intervalle normal selon l'algorithme SM-2
 - **Utiliser quand** : Vous vous souvenez correctement
 - **C'est le bouton par défaut** pour une bonne maîtrise
 
-### 😊 **Facile** (Easy - Rating 3)
+### **Facile** (Easy - Rating 3)
 - **Nouvelle carte** : Graduation immédiate (4 jours)
 - **Carte en révision** : Intervalle augmenté (×ease×1.3), ease +0.15
 - **Utiliser quand** : Vous trouvez la carte très facile

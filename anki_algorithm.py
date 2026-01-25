@@ -1,12 +1,3 @@
-"""
-Algorithme de répétition espacée SM-2 (SuperMemo 2)
-Utilisé par Anki pour optimiser la mémorisation
-
-Références:
-- https://www.supermemo.com/en/archives1990-2015/english/ol/sm2
-- https://faqs.ankiweb.net/what-spaced-repetition-algorithm.html
-"""
-
 from datetime import datetime, timedelta
 
 
